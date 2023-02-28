@@ -5,9 +5,8 @@ from pyrep.objects.vision_sensor import VisionSensor
 from agent import Agent
 
 SCENE_FILE = join(dirname(abspath(__file__)), 'scenes/scene_LineTracerLua.ttt')
-#STARTING_POSITION = [-0.23075932,  0.82499611,  0.02054373, -0.37992865, -0.59636891, -0.3799291 ,  0.59636581]
-STARTING_POSITION = [-1.1307591199874878, 0.5999963283538818, 0.027543731033802032, 0.29883480072021484, -0.6408583521842957, 0.2988368570804596, 0.6408547759056091]
-SsTARTING_POSITION = [-0.2307, -0.825, 0.026846]
+#STARTING_POSITION = [-2.9057591 , -2.55000305,  0.02754373,  0.2988348 , -0.64085835,0.29883686,  0.6408549 ] #big
+STARTING_POSITION = [-2.45576   ,  1.92499709,  0.02754373,  0.2988348 , -0.64085835, 0.29883686,  0.6408549 ] #klukaty
 pr = PyRep()
 pr.launch(SCENE_FILE, headless=False)
 pr.start()
@@ -59,9 +58,10 @@ while not done:
 
     leftSensorState = leftSensor.capture_rgb()
     rightSensorState = rightensor.capture_rgb()
+    print(leftSensorState.flat[0], rightSensorState.flat[0])
     newState = [leftSensorState.flat[0], rightSensorState.flat[0]]
     agent.targetMemory(state, action, reward, newState)
-
+    ad = robot.get_pose()
     pr.step()
 
 pr.stop()
