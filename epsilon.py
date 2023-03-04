@@ -1,5 +1,5 @@
 class Epsilon:
-    def __init__(self, epsilon_min: float = 0.01, epsilon_dec: float = 0.00005, epsilon: float = 1):
+    def __init__(self, epsilon_min: float = 0.01, epsilon_dec: float = 0.000005, epsilon: float = 1):
         self.epsilon_min = epsilon_min
         self.epsilon_dec = epsilon_dec
         self.value = epsilon

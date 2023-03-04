@@ -13,7 +13,7 @@ class Agent():
     def __init__(self):
         self.memory = deque(maxlen = MAX_MEMORY)
         self.shortMemory = deque(maxlen = 11)
-        self.model = NeuralNetwork(2 ,256, 3)
+        self.model = NeuralNetwork(512 ,2500, 3)
         self.trainer = Trainer(self.model)
         self.epsilon = Epsilon()
     
