@@ -4,9 +4,14 @@ from pyrep.robots.mobiles.line_tracer import LineTracer
 from pyrep.objects.vision_sensor import VisionSensor
 from agent import Agent
 import numpy as np
+
 SCENE_FILE = join(dirname(abspath(__file__)), 'scenes/scene_LineTracerLua.ttt')
 #STARTING_POSITION = [-2.9057591 , -2.55000305,  0.02754373,  0.2988348 , -0.64085835,0.29883686,  0.6408549 ] #big
 STARTING_POSITION = [-2.45576   ,  1.92499709,  0.02754373,  0.2988348 , -0.64085835, 0.29883686,  0.6408549 ] #klukaty
+CHECKPOINT_1 = [-2.030761,    2.22499752,  0.02754373,  0.12278704 -0.6963675,   0.12278818, 0.69636106]
+CHECKPOINT_2 = [-1.10576117,  1.8,  0.02754373, -0.43045604, -0.56099224, -0.43046466, 0.56097722]
+CHECKPOINT_3 = [-1.43076015,  1.44999731,  0.02754373 -0.6743784,  -0.21263161, -0.67438203, 0.21263009]
+CHECKPOINT_4 = [-2.43076134,  1.29999828,  0.02754373,  0.56097728, -0.43046471,  0.5609923, 0.43045613]
 
 def calcColor(SensorState):
     colorList = []
@@ -49,6 +54,13 @@ def main():
     reward = 0
     wrongWayCounter = 0
 
+    checkpoint_1_done = False
+    checkpoint_2_done = False
+    checkpoint_3_done = False
+    checkpoint_4_done = False
+    num_of_laps = 0
+    laps_history = []
+
     while not done:
         leftSensorState = leftSensor.capture_rgb()
         rightSensorState = rightensor.capture_rgb()        
@@ -88,8 +100,15 @@ def main():
             agent.replayMemory()
             wrongWayCounter = 0
             reward = -800
+            checkpoint_1_done = False
+            checkpoint_2_done = False
+            checkpoint_3_done = False
+            checkpoint_4_done = False
             
-        print(reward)
+            laps_history.append(num_of_laps)
+            agent.check_plot(laps_history)
+            num_of_laps = 0
+
 
         leftSensorState = leftSensor.capture_rgb()
         rightSensorState = rightensor.capture_rgb()
@@ -99,6 +118,21 @@ def main():
 
         newState = lstate + rstate
         agent.targetMemory(state, action, reward, newState)
+
+        position = robot.get_pose()
+
+        if(position[0] > CHECKPOINT_1[0]):
+            checkpoint_1_done = True
+        if(position[1] < CHECKPOINT_2[1] and checkpoint_1_done):
+            checkpoint_2_done = True
+        if(position[0] < CHECKPOINT_3[0] and checkpoint_1_done and checkpoint_2_done):
+            checkpoint_3_done = True
+        if(position[1] > CHECKPOINT_4[1] and checkpoint_1_done and checkpoint_2_done and checkpoint_3_done):
+            checkpoint_1_done = False
+            checkpoint_2_done = False
+            checkpoint_3_done = False
+            checkpoint_4_done = False
+            num_of_laps += 1
 
         pr.step()
 

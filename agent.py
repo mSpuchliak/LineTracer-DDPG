@@ -5,6 +5,7 @@ from collections import deque
 from epsilon import Epsilon 
 from neuralNetwork import NeuralNetwork
 from trainer import Trainer
+from plotting import Plotting
 
 MAX_MEMORY = 100000
 BATCH_SIZE = 10000
@@ -16,6 +17,7 @@ class Agent():
         self.model = NeuralNetwork(512 ,2500, 3)
         self.trainer = Trainer(self.model)
         self.epsilon = Epsilon()
+        self.plot = Plotting();
     
     def getAction(self, state):
         self.epsilon.update_epsilon()
@@ -42,3 +44,6 @@ class Agent():
         state, action, reward, next_state = zip(*sample)
         self.trainer.trainStep(state, action, reward, next_state, len(sample))
 
+    def check_plot(self, laps_history):
+        if (self.epsilon.value == self.epsilon.epsilon_min):
+            self.plot.plot_laps(laps_history)
