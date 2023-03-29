@@ -62,5 +62,19 @@ class LineTracerHelper:
             self.checkpoint_2_done = False
             self.checkpoint_3_done = False
             self.num_of_laps += 1
+    
+    def check_going_backwards(self, orientation):
+        if(not self.checkpoint_1_done):
+            if(orientation[0] < -1):
+                self.reward = -2
+        if(self.checkpoint_1_done and not self.checkpoint_3_done):
+            if(orientation[1] > 1):
+                self.reward = -2
+        if(self.checkpoint_2_done and not self.checkpoint_3_done):
+            if(orientation[0] > 1):
+                self.reward = -2
+        if(self.checkpoint_3_done):
+            if(orientation[1] < -1):
+                self.reward = -2
 
 

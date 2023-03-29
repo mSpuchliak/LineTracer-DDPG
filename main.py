@@ -27,8 +27,8 @@ def main():
 
         lstate = agent.normalize_state(left_sensor_state)
         rstate = agent.normalize_state(right_sensor_state)
-
-        state = lstate + rstate
+    
+        state = lstate + rstate +robot.get_orientation().tolist()
         action = agent.get_action(state)
 
         command = agent.create_command(action)
@@ -38,7 +38,9 @@ def main():
         correct_rows_count_r = robot_helper.calc_correct_rows(right_sensor_state)
 
         robot_helper.calc_reward(correct_rows_count_l, correct_rows_count_r)
-        
+
+        robot_helper.check_going_backwards(robot.get_orientation())
+
         if(robot_helper.check_wrong_way()):
             robot.set_pose(STARTING_POSITION)
             agent.replayMemory()
@@ -50,7 +52,8 @@ def main():
         lstate = agent.normalize_state(left_sensor_state)
         rstate = agent.normalize_state(right_sensor_state)
 
-        newState = lstate + rstate
+        print(robot_helper.reward, robot.get_orientation())
+        newState = lstate + rstate + robot.get_orientation().tolist()
         agent.targetMemory(state, action, robot_helper.reward, newState)
 
         position = robot.get_pose()
