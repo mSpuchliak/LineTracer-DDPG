@@ -17,7 +17,7 @@ class Agent():
         self.model = NeuralNetwork(515 , 2500, 3)
         self.trainer = Trainer(self.model)
         self.epsilon = Epsilon()
-        self.plot = Plotting();
+        self.plot = Plotting()
     
     def get_action(self, state):
         self.epsilon.update_epsilon()
@@ -50,13 +50,13 @@ class Agent():
                     state.append(0)
         return state
 
-    def targetMemory(self, state, action, reward, new_state):
+    def target_memory(self, state, action, reward, new_state):
         self.short_memory.append((state, action, reward, new_state))
         self.memory.append((state, action, reward, new_state))
         state, action, reward , new_state = zip(*self.short_memory)
         self.trainer.trainStep(state, action, reward, new_state, len(self.short_memory))
     
-    def replayMemory(self):
+    def replay_memory(self):
         if len(self.memory) > BATCH_SIZE:
             sample = random.sample(self.memory, BATCH_SIZE)
         else:

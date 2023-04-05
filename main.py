@@ -27,8 +27,8 @@ def main():
 
         lstate = agent.normalize_state(left_sensor_state)
         rstate = agent.normalize_state(right_sensor_state)
-    
-        state = lstate + rstate +robot.get_orientation().tolist()
+        orientation = robot.get_orientation().tolist()
+        state = lstate + rstate + orientation
         action = agent.get_action(state)
 
         command = agent.create_command(action)
@@ -43,7 +43,7 @@ def main():
 
         if(robot_helper.check_wrong_way()):
             robot.set_pose(STARTING_POSITION)
-            agent.replayMemory()
+            agent.replay_memory()
             agent.check_plot(robot_helper.laps_history)
 
         left_sensor_state = left_sensor.capture_rgb()
@@ -51,10 +51,12 @@ def main():
 
         lstate = agent.normalize_state(left_sensor_state)
         rstate = agent.normalize_state(right_sensor_state)
-
+        orientation = robot.get_orientation().tolist()
+        
         print(robot_helper.reward, robot.get_orientation())
-        newState = lstate + rstate + robot.get_orientation().tolist()
-        agent.targetMemory(state, action, robot_helper.reward, newState)
+        
+        newState = lstate + rstate + orientation
+        agent.target_memory(state, action, robot_helper.reward, newState)
 
         position = robot.get_pose()
         robot_helper.check_checkpoints(position)
