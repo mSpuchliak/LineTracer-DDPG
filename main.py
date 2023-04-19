@@ -27,8 +27,12 @@ def main():
 
         lstate = agent.normalize_state(left_sensor_state)
         rstate = agent.normalize_state(right_sensor_state)
+
         orientation = robot.get_orientation().tolist()
-        state = lstate + rstate + orientation
+        position = robot.get_pose()
+
+        state = lstate + rstate + orientation + [position[0], position[1]]
+
         action = agent.get_action(state)
 
         command = agent.create_command(action)
@@ -39,12 +43,7 @@ def main():
 
         robot_helper.calc_reward(correct_rows_count_l, correct_rows_count_r)
 
-        robot_helper.check_going_backwards(robot.get_orientation())
-
-        if(robot_helper.check_wrong_way()):
-            robot.set_pose(STARTING_POSITION)
-            agent.replay_memory()
-            agent.check_plot(robot_helper.laps_history)
+        robot_helper.check_going_backwards(robot.get_orientation(), robot.get_pose())
 
         left_sensor_state = left_sensor.capture_rgb()
         right_sensor_state = right_sensor.capture_rgb()
@@ -52,14 +51,28 @@ def main():
         lstate = agent.normalize_state(left_sensor_state)
         rstate = agent.normalize_state(right_sensor_state)
         orientation = robot.get_orientation().tolist()
-        
-        print(robot_helper.reward, robot.get_orientation())
-        
-        newState = lstate + rstate + orientation
-        agent.target_memory(state, action, robot_helper.reward, newState)
 
+        print(robot_helper.reward, robot.get_orientation(),  position[0], position[1])
+        
         position = robot.get_pose()
         robot_helper.check_checkpoints(position)
+
+        if(robot_helper.check_wrong_way()):
+            robot.set_pose(STARTING_POSITION)
+            agent.replay_memory()
+            agent.check_plot(robot_helper.laps_history)
+            robot_helper.num_of_laps = 0
+
+        new_state = lstate + rstate + orientation + [position[0], position[1]]
+
+        agent.target_memory(state, action, robot_helper.reward, new_state)
+
+        if(robot_helper.round_done):
+            robot.set_pose(STARTING_POSITION)
+            agent.replay_memory()
+            agent.check_plot(robot_helper.laps_history)
+            robot_helper.round_done = False
+            robot_helper.num_of_laps = 0
 
         pr.step()
 

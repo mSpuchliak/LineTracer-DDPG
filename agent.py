@@ -14,14 +14,15 @@ class Agent():
     def __init__(self):
         self.memory = deque(maxlen = MAX_MEMORY)
         self.short_memory = deque(maxlen = 11)
-        self.model = NeuralNetwork(515 , 2500, 3)
+        self.model = NeuralNetwork(517, 2500, 3)
         self.trainer = Trainer(self.model)
         self.epsilon = Epsilon()
         self.plot = Plotting()
     
     def get_action(self, state):
         self.epsilon.update_epsilon()
-        #print("Epsilon: ", self.epsilon.value)
+        if(self.epsilon.value != self.epsilon.epsilon_min):
+            print("Epsilon: ", self.epsilon.value)
         if np.random.random() < self.epsilon.value:
             action = random.randint(0, 2)
         else:
