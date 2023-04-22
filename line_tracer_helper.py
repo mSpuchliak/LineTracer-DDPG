@@ -1,4 +1,4 @@
-from settings import STARTING_POSITION, CHECKPOINT_1, CHECKPOINT_2, CHECKPOINT_3, CHECKPOINT_4
+from settings import STARTING_POSITION, CHECKPOINT_1, CHECKPOINT_2, CHECKPOINT_3
 
 class LineTracerHelper:
     def __init__(self) -> None:
@@ -18,12 +18,15 @@ class LineTracerHelper:
         self.failed_to_complete_reward = -400
     
     def calc_reward(self, correct_rows_count_l, correct_rows_count_r):
+
         if(correct_rows_count_l > 8 and correct_rows_count_r > 8):
             self.reward = self.both_sensor_reward
             self.wrong_way_counter = 0
+
         elif(correct_rows_count_l > 8 or correct_rows_count_r > 8):
             self.reward = self.one_sensor_reward
             self.wrong_way_counter = 0
+
         else:
             self.reward = self.off_track_reward
             self.wrong_way_counter += 1
@@ -79,31 +82,43 @@ class LineTracerHelper:
             self.round_done = True
     
     def check_going_backwards(self, orientation, position):
-        if(STARTING_POSITION[0] < CHECKPOINT_1[0] and STARTING_POSITION[1] < CHECKPOINT_1[1]):
-            pass
+        if(position[0] < 0 and position[1] < 0):
+            if(orientation[0] > 0 or orientation[1] > 0):
+                pass
+            else:
+                self.reward = self.going_backwards_reward
+                self.checkpoint_1_done = False
+                self.checkpoint_2_done = False
+                self.checkpoint_3_done = False
         
-        if(CHECKPOINT_1[0] < CHECKPOINT_1[0] and CHECKPOINT_1[1] < CHECKPOINT_1[1]):
-            pass
+        if(position[0] < 0 and position[1] > 0):
+            if(orientation[0] > 0 or orientation[1] < 0):
+                pass
+            else:
+                self.reward = self.going_backwards_reward
+                self.checkpoint_1_done = False
+                self.checkpoint_2_done = False
+                self.checkpoint_3_done = False
+        
+        if(position[0] > 0 and position[1] > 0):
+            if(orientation[0] < 0 or orientation[1] < 0):
+                pass
+            else:
+                self.reward = self.going_backwards_reward
+                self.checkpoint_1_done = False
+                self.checkpoint_2_done = False
+                self.checkpoint_3_done = False
+        if(position[0] > 0 and position[1] < 0):
+            if(orientation[0] < 0 or orientation[1] > 0):
+                pass
+            else:
+                self.reward = self.going_backwards_reward
+                self.checkpoint_1_done = False
+                self.checkpoint_2_done = False
+                self.checkpoint_3_done = False
 
-        if(STARTING_POSITION[0] < CHECKPOINT_1[0] and STARTING_POSITION[1] < CHECKPOINT_1[1]):
-            pass
-
-        if(STARTING_POSITION[0] < CHECKPOINT_1[0] and STARTING_POSITION[1] < CHECKPOINT_1[1]):
-            pass
-
-        # if(not self.checkpoint_1_done):
-        #     if(orientation[0] < -1):
-        #         self.reward = self.going_backwards_reward
-
-        # if(self.checkpoint_1_done and not self.checkpoint_3_done):
-        #     if(orientation[1] > 1):
-        #         self.reward = self.going_backwards_reward
-
-        # if(self.checkpoint_2_done and not self.checkpoint_3_done):
-        #     if(orientation[0] > 1):
-        #         self.reward = self.going_backwards_reward
-
-        # if(self.checkpoint_3_done):
-        #     if(orientation[1] < -1):
-        #         self.reward = self.going_backwards_reward
-
+    def check_sensor_malfunction(self, sum_correct_rows, sum_correct_rows_new):
+        if(sum_correct_rows == 0 and sum_correct_rows_new > 15):
+            return True
+        else:
+            return False
