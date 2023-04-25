@@ -30,26 +30,6 @@ class Agent():
             actions = self.model.forward(state)
             action = torch.argmax(actions).item()
         return action
-    
-    def create_command(self, action):
-        if action == 0:
-            command = [1, 0]
-        elif action == 1:
-            command = [0, 1]
-        elif action == 2:
-            command = [1, 1]
-
-        return command
-    
-    def normalize_state(self, sensor_state):
-        state = []
-        for rows in sensor_state:
-            for pixel in rows:
-                if(pixel[0] == 1.0):
-                    state.append(1)
-                else:
-                    state.append(0)
-        return state
 
     def target_memory(self, state, action, reward, new_state):
         self.short_memory.append((state, action, reward, new_state))
