@@ -3,7 +3,7 @@ import random
 import torch
 from collections import deque
 from epsilon import Epsilon 
-from neuralNetwork import NeuralNetwork
+from neural_network import NeuralNetwork
 from trainer import Trainer
 from plotting import Plotting
 
@@ -21,8 +21,7 @@ class Agent():
     
     def get_action(self, state):
         self.epsilon.update_epsilon()
-        #if(self.epsilon.value != self.epsilon.epsilon_min):
-            #print("Epsilon: ", self.epsilon.value)
+
         if np.random.random() < self.epsilon.value:
             action = random.randint(0, 2)
         else:
@@ -35,6 +34,7 @@ class Agent():
         self.short_memory.append((state, action, reward, new_state))
         self.memory.append((state, action, reward, new_state))
         state, action, reward , new_state = zip(*self.short_memory)
+
         self.trainer.trainStep(state, action, reward, new_state, len(self.short_memory))
     
     def replay_memory(self):
@@ -43,6 +43,7 @@ class Agent():
         else:
             sample = self.memory
         state, action, reward, next_state = zip(*sample)
+        
         self.trainer.trainStep(state, action, reward, next_state, len(sample))
 
     def check_plot(self, laps_history):

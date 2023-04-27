@@ -8,7 +8,7 @@ class Plotting:
         plt.clf()
         plt.ion()
         plt.xlabel('Number of starts')
-        plt.ylabel('laps_history')
+        plt.ylabel('Has finished the round')
         plt.plot(laps_history)
         plt.show(block=False)
         plt.pause(.1)
