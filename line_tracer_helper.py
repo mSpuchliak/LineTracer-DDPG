@@ -17,6 +17,7 @@ class LineTracerHelper:
         self.completed_round_reward = 400
         self.failed_to_complete_reward = -400
     
+    # Creating a command to be executed by the robot according to the action.
     def create_command(self, action):
         if action == 0:
             command = [1, 0]
@@ -32,6 +33,7 @@ class LineTracerHelper:
 
         return command
     
+    # Check for the status of the robot, and assigning a reward for the current status.
     def check_state(self, correct_rows_count_l, correct_rows_count_r):
 
         if(correct_rows_count_l > 8 and correct_rows_count_r > 8):
@@ -46,18 +48,16 @@ class LineTracerHelper:
             self.reward = self.off_track_reward
             self.wrong_way_counter += 1
     
+    # Check for the position of the robot, if the robot does not go too long in the wrong direction.
     def check_wrong_way(self):
         if(self.wrong_way_counter == 400):
             self.wrong_way_counter = 0
             self.reward = self.failed_to_complete_reward
             self.reset_checkpoints()
             self.laps_history.append(0)
+            self.round_done = True
 
-            return True
-        
-        else:
-            return False
-
+    # Check for the position of the robot, to be able to tell when the robot will pass the whole path.
     def check_checkpoints(self, position):
         if(position[0] > self.scene.checkpoint_1[0]):
             self.checkpoint_1_done = True
@@ -74,6 +74,7 @@ class LineTracerHelper:
             self.reward = self.completed_round_reward
             self.round_done = True
     
+    # Check the position and rotation of the robot, if it is not going in the opposite direction.
     def check_going_backwards(self, orientation, position):
         if(position[0] < 0 and position[1] < 0):
             if not(orientation[0] > 0 or orientation[1] > 0):
@@ -94,7 +95,8 @@ class LineTracerHelper:
             if not(orientation[0] < 0 or orientation[1] > 0):
                 self.reward = self.going_backwards_reward
                 self.reset_checkpoints()
-        
+    
+    # Reset of checkpoints.
     def reset_checkpoints(self):
         self.checkpoint_1_done = False
         self.checkpoint_2_done = False

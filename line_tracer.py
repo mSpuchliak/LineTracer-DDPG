@@ -21,6 +21,7 @@ class LineTracerModel(MobileBase):
         self.left_sensor_state = []
         self.right_sensor_state = []
 
+    # Getting value pixels of sensors
     def get_state(self):
         self.left_sensor_state = self.left_sensor.capture_rgb()
         self.right_sensor_state = self.right_sensor.capture_rgb()        
@@ -33,6 +34,7 @@ class LineTracerModel(MobileBase):
 
         return lstate + rstate + [self.orientation[0], self.orientation[1]] + [self.position[0], self.position[1]]
     
+    # Setting state and count of correct rows for both of sensors
     def set_state(self):
         self.state = self.get_state()
 
@@ -44,6 +46,7 @@ class LineTracerModel(MobileBase):
             self.correct_rows_count_r  = self.correct_rows_count_r_new
             self.correct_rows_count_l = self.correct_rows_count_l_new 
     
+    # Setting new state and count of correct rows for both of sensors
     def set_new_state(self):
         self.new_state = self.get_state()
 
@@ -55,6 +58,7 @@ class LineTracerModel(MobileBase):
             self.correct_rows_count_r_new  = self.correct_rows_count_r
             self.correct_rows_count_l_new = self.correct_rows_count_l 
 
+    # Normalization of states.
     def normalize_state(self, sensor_state):
         state = []
         for rows in sensor_state:
@@ -65,6 +69,7 @@ class LineTracerModel(MobileBase):
                     state.append(0)
         return state
 
+    # Calculation of pixels that returned red color, and returning count of rows that had more red pixels than a certain threshold.
     def calc_correct_rows(self, sensor_state):
         rows_evaluation = []
 
@@ -83,12 +88,13 @@ class LineTracerModel(MobileBase):
 
         return correct_rows_count
     
+    # Check for malfunction of sensors, for state.
     def check_sensor_malfunction(self):
         if(self.correct_rows_count_l + self.correct_rows_count_r == 0 and self.correct_rows_count_l_new + self.correct_rows_count_r_new > 15):
             return True
         else:
             return False
-    
+    # Check for malfunction of sensors, for new state.
     def check_sensor_malfunction_new(self):
         if(self.correct_rows_count_l_new + self.correct_rows_count_r_new == 0 and self.correct_rows_count_l + self.correct_rows_count_r > 15):
             return True

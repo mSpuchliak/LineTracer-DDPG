@@ -11,13 +11,12 @@ def main():
     pr = PyRep()
     pr.launch(scene.name, headless=False)
     pr.start()
-
+    
     agent = Agent()
     robot_helper = LineTracerHelper(scene)
     robot = LineTracerModel()
     
     done = False
-
     while not done:
         # STATE
         robot.set_state()
@@ -26,6 +25,7 @@ def main():
         action = agent.get_action(robot.state)
         command = robot_helper.create_command(action)
 
+        # setting command to the wheels
         robot.set_joint_target_velocities(command)
         pr.step()
 
@@ -39,14 +39,9 @@ def main():
 
         robot_helper.check_going_backwards(robot.orientation, robot.position)
 
-        if(robot_helper.check_wrong_way()):
-            robot.set_pose(scene.starting_position)
-            agent.replay_memory()
-            agent.check_plot(robot_helper.laps_history)
+        robot_helper.check_wrong_way()
 
         # CALCULATION OF BELLMAN
-        print(robot_helper.reward)
-
         agent.target_memory(robot.state, action, robot_helper.reward, robot.new_state)
 
         if(robot_helper.round_done):

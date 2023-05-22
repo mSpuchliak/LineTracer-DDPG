@@ -19,6 +19,7 @@ class Agent():
         self.epsilon = Epsilon()
         self.plot = Plotting()
     
+    # Select actions either by chance or by experience.
     def get_action(self, state):
         self.epsilon.update_epsilon()
 
@@ -28,15 +29,18 @@ class Agent():
             state = torch.tensor(state, dtype= torch.float)
             actions = self.model.forward(state)
             action = torch.argmax(actions).item()
+
         return action
 
+    # Prepearment to batch informatons for the bellman equasion.
     def target_memory(self, state, action, reward, new_state):
         self.short_memory.append((state, action, reward, new_state))
         self.memory.append((state, action, reward, new_state))
         state, action, reward , new_state = zip(*self.short_memory)
 
-        self.trainer.trainStep(state, action, reward, new_state, len(self.short_memory))
+        self.trainer.train_step(state, action, reward, new_state, len(self.short_memory))
     
+    # Use of replay memory.
     def replay_memory(self):
         if len(self.memory) > BATCH_SIZE:
             sample = random.sample(self.memory, BATCH_SIZE)
@@ -44,8 +48,9 @@ class Agent():
             sample = self.memory
         state, action, reward, next_state = zip(*sample)
         
-        self.trainer.trainStep(state, action, reward, next_state, len(sample))
+        self.trainer.train_step(state, action, reward, next_state, len(sample))
 
+    # Plotitng of the graph.
     def check_plot(self, laps_history):
         if (self.epsilon.value == self.epsilon.epsilon_min):
             self.plot.plot_laps(laps_history)
