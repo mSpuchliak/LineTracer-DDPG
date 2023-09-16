@@ -101,3 +101,14 @@ class LineTracerHelper:
         self.checkpoint_1_done = False
         self.checkpoint_2_done = False
         self.checkpoint_3_done = False
+
+    def check_proximity(self, robot_model):
+        p_front = robot_model.proximity_sensor_front.read()
+        p_left = robot_model.proximity_sensor_left.read()
+        p_right = robot_model.proximity_sensor_right.read()
+
+        if(p_front < 1.5 or p_right < 1.5 or p_left < 1.5):
+            self.reward -= 10
+            print("Too close to walker" + str(p_front) + "|" + str(p_left) + "|" + str(p_right))
+        else:
+            print("Good distance")
