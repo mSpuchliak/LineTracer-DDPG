@@ -9,18 +9,18 @@ class LineTracerModel(MobileBase):
 
         left_sensor_object = self.get_object('LeftSensor')
         right_sensor_object = self.get_object('RightSensor')
-        proximity_sensor_front_object = self.get_object('ProximitySensorFront')
-        proximity_sensor_left_object = self.get_object('ProximitySensorLeft')
-        proximity_sensor_right_object = self.get_object('ProximitySensorRight')
+        #proximity_sensor_front_object = self.get_object('ProximitySensorFront')
+        #proximity_sensor_left_object = self.get_object('ProximitySensorLeft')
+        #proximity_sensor_right_object = self.get_object('ProximitySensorRight')
 
-        self.proximity_sensor_front = ProximitySensor(proximity_sensor_front_object.get_handle())
-        self.proximity_sensor_left = ProximitySensor(proximity_sensor_left_object.get_handle())
-        self.proximity_sensor_right = ProximitySensor(proximity_sensor_right_object.get_handle())
+        # self.proximity_sensor_front = ProximitySensor(proximity_sensor_front_object.get_handle())
+        # self.proximity_sensor_left = ProximitySensor(proximity_sensor_left_object.get_handle())
+        # self.proximity_sensor_right = ProximitySensor(proximity_sensor_right_object.get_handle())
         self.left_sensor = VisionSensor(left_sensor_object.get_handle())
         self.right_sensor = VisionSensor(right_sensor_object.get_handle())
 
-        cuboid_obejct = self.get_object('Cuboid')
-        self.cuboid = Shape(cuboid_obejct.get_handle())
+        #cuboid_obejct = self.get_object('Cuboid')
+        #self.cuboid = Shape(cuboid_obejct.get_handle())
        
         self.state = []
         self.new_state = []

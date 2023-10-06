@@ -8,7 +8,7 @@ class DeepQLearining():
 
     def start(self):
         sceneFactory = SceneFactory()
-        scene = sceneFactory.create_scene('Human')
+        scene = sceneFactory.create_scene('Curve')
         
         pr = PyRep()
         pr.launch(scene.name, headless=False)
@@ -41,7 +41,7 @@ class DeepQLearining():
 
             robot_helper.check_going_backwards(robot.orientation, robot.position)
 
-            robot_helper.check_proximity(robot)
+            #robot_helper.check_proximity(robot)
 
             robot_helper.check_wrong_way()
 
