@@ -13,7 +13,7 @@ class ActorCritic():
         pr.launch(scene.name, headless=False)
         pr.start()
         
-        agent = GenericAgent(516, 3)
+        agent = GenericAgent(516, 2)
         robot_helper = LineTracerHelper(scene)
         robot = LineTracerModel()
 
