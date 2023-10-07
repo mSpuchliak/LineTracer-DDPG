@@ -16,15 +16,16 @@ class GenericAgent(object):
 
     def select_action(self, state):
         state = T.FloatTensor(state)
-        mu, sigma = self.actor.forward(state)
-        sigma = T.exp(sigma)
-        action_probs = T.distributions.Normal(loc=mu, scale= T.abs(sigma)) 
-        probs = action_probs.sample(sample_shape=T.Size([self.output_dim]))
+        mu = self.actor.forward(state)
+        
+
+        #action_probs = T.distributions.Normal(loc=mu, scale= T.abs(sigma)) 
+        action_probs = T.distributions.Categorical(mu)
+        probs = action_probs.sample()
 
         self.log_probs = action_probs.log_prob(probs)
-        action = T.tanh(probs)
 
-        return action
+        return probs
     
     def update(self, state, reward, next_state):
         self.optimizer.zero_grad()

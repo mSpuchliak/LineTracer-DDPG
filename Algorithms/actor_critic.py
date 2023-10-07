@@ -13,7 +13,7 @@ class ActorCritic():
         pr.launch(scene.name, headless=False)
         pr.start()
         
-        agent = GenericAgent(516, 2)
+        agent = GenericAgent(516, 3)
         robot_helper = LineTracerHelper(scene)
         robot = LineTracerModel()
 
@@ -23,18 +23,19 @@ class ActorCritic():
             robot.set_state()
 
             # ACTION
-            action_r, action_l = agent.select_action(robot.state)
+            action = agent.select_action(robot.state)
 
-            action_l = abs(round(action_l.item()))
-            action_r = abs(round(action_r.item()))
+            # action_l = abs(round(action_l.item()))
+            # action_r = abs(round(action_r.item()))
 
-    
+            # action_l = action_l + 1
+            # action_r = action_r + 1
+            # print(action_l, action_r)
 
-            action_l = action_l + 1
-            action_r = action_r + 1
-            print(action_l, action_r)
+            command = robot_helper.create_command(action)
+
             # setting command to the wheels
-            robot.set_joint_target_velocities([action_r, action_l])
+            robot.set_joint_target_velocities(command)
             pr.step()
 
             # NEW STATE
