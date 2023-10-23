@@ -47,7 +47,6 @@ class LineTracerHelper:
         else:
             self.reward = self.off_track_reward
             self.wrong_way_counter += 1
-            print(self.wrong_way_counter)
     
     # Check for the position of the robot, if the robot does not go too long in the wrong direction.
     def check_wrong_way(self):

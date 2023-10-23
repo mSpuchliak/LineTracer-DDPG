@@ -1,5 +1,5 @@
 from pyrep import PyRep
-from generic_agent import GenericAgent
+from generic_agent import GenericAgent, MADDPGAgent
 from scene_factory import SceneFactory
 from line_tracer import LineTracerModel
 from line_tracer_helper import LineTracerHelper
@@ -7,13 +7,15 @@ from line_tracer_helper import LineTracerHelper
 class ActorCritic():
     def start(self):
         sceneFactory = SceneFactory()
-        scene = sceneFactory.create_scene('Curve')
+        scene = sceneFactory.create_scene('Circle')
         
         pr = PyRep()
         pr.launch(scene.name, headless=False)
         pr.start()
         
-        agent = GenericAgent(516, 3)
+        agent = MADDPGAgent(516, 2)
+        agent2 = MADDPGAgent(516, 2)
+
         robot_helper = LineTracerHelper(scene)
         robot = LineTracerModel()
 
@@ -23,18 +25,21 @@ class ActorCritic():
             robot.set_state()
 
             # ACTION
-            action = agent.select_action(robot.state)
+            #action = agent.select_action(robot.state)
 
-            # action_l = abs(round(action_l.item()))
-            # action_r = abs(round(action_r.item()))
+            action_l = agent.select_action(robot.state)
+            action_r = agent2.select_action(robot.state)
 
-            # action_l = action_l + 1
-            # action_r = action_r + 1
-            # print(action_l, action_r)
+            action_l = action_l + 2
+            action_r = action_r + 2
 
-            command = robot_helper.create_command(action)
+            #command = robot_helper.create_command(action)
 
             # setting command to the wheels
+            #robot.set_joint_target_velocities(command)
+            command = [action_r, action_l]
+            print(command)
+
             robot.set_joint_target_velocities(command)
             pr.step()
 
@@ -50,14 +55,13 @@ class ActorCritic():
 
             robot_helper.check_wrong_way()
 
-            #print(action_l, action_r, robot_helper.reward)
-
             # CALCULATION OF BELLMAN
-            agent.update(robot.state, robot_helper.reward, robot.new_state)
+            agent.update(robot.state, action_l, robot_helper.reward, robot.new_state)
+            agent2.update(robot.state, action_r, robot_helper.reward, robot.new_state)
 
             if(robot_helper.round_done):
                 robot.set_pose(scene.starting_position)
-                agent.check_plot(robot_helper.laps_history)
+                #agent.check_plot(robot_helper.laps_history)
                 robot_helper.round_done = False
 
         pr.stop()
