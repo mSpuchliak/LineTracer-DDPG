@@ -50,7 +50,7 @@ class LineTracerHelper:
     
     # Check for the position of the robot, if the robot does not go too long in the wrong direction.
     def check_wrong_way(self):
-        if(self.wrong_way_counter == 400):
+        if(self.wrong_way_counter > 400):
             self.wrong_way_counter = 0
             self.reward = self.failed_to_complete_reward
             self.reset_checkpoints()
@@ -79,21 +79,25 @@ class LineTracerHelper:
         if(position[0] < 0 and position[1] < 0):
             if not(orientation[0] > 0 or orientation[1] > 0):
                 self.reward = self.going_backwards_reward
+                self.wrong_way_counter += 1
                 self.reset_checkpoints()
         
         if(position[0] < 0 and position[1] > 0):
             if not(orientation[0] > 0 or orientation[1] < 0):
                 self.reward = self.going_backwards_reward
+                self.wrong_way_counter += 1
                 self.reset_checkpoints()
         
         if(position[0] > 0 and position[1] > 0):
             if not(orientation[0] < 0 or orientation[1] < 0):
                 self.reward = self.going_backwards_reward
+                self.wrong_way_counter += 1
                 self.reset_checkpoints()
 
         if(position[0] > 0 and position[1] < 0):
             if not(orientation[0] < 0 or orientation[1] > 0):
                 self.reward = self.going_backwards_reward
+                self.wrong_way_counter += 1
                 self.reset_checkpoints()
     
     # Reset of checkpoints.

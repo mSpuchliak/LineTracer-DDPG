@@ -7,27 +7,19 @@ from line_tracer_helper import LineTracerHelper
 class ActorCritic():
     def start(self):
         sceneFactory = SceneFactory()
-        scene = sceneFactory.create_scene('Circle')
+        scene = sceneFactory.create_scene('Curve')
         
         pr = PyRep()
         pr.launch(scene.name, headless=False)
         pr.start()
-        
-        # agent = MADDPGAgent(516, 2)
-        # agent2 = MADDPGAgent(516, 2)
 
         agent = Agent(alpha=0.0001, beta=0.001, 
                     input_dims=[516], tau=0.001,
                     batch_size=64, fc1_dims=400, fc2_dims=300, 
-                    n_actions=1)
+                    n_actions=2)
 
-        agent2 = Agent(alpha=0.0001, beta=0.001, 
-                    input_dims=[516], tau=0.001,
-                    batch_size=64, fc1_dims=400, fc2_dims=300, 
-                    n_actions=1)
-        
         agent.noise.reset()
-        agent2.noise.reset()
+
 
         robot_helper = LineTracerHelper(scene)
         robot = LineTracerModel()
@@ -38,16 +30,16 @@ class ActorCritic():
             robot.set_state()
 
             # ACTION
-            action_l = agent.choose_action(robot.state)
-            action_r = agent2.choose_action(robot.state)
+            action_l, action_r = agent.choose_action(robot.state)
+
+            command2 = [action_l, action_r]
 
             action_l2 = action_l + 2
             action_r2 = action_r + 2
 
             # setting command to the wheels
-            command = [action_r2, action_l2]
-            print(command)
-
+            command = [action_l2, action_r2]
+            
             robot.set_joint_target_velocities(command)
             pr.step()
 
@@ -62,11 +54,9 @@ class ActorCritic():
             robot_helper.check_going_backwards(robot.orientation, robot.position)
 
             robot_helper.check_wrong_way()
-
-            agent.remember(robot.state, action_l, robot_helper.reward, robot.new_state, done)
-            agent.learn()
-
-            agent.remember(robot.state, action_r ,robot_helper.reward, robot.new_state, done)
+            
+            print(command[0],command[1], robot_helper.reward)
+            agent.remember(robot.state, command2, robot_helper.reward, robot.new_state, done)
             agent.learn()
 
             if(robot_helper.round_done):
