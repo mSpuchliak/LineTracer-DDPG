@@ -1,78 +1,61 @@
-from generic_network import GenericNetwork, Actor, Critic
-import torch as T
+from generic_network import Actor, Critic, ActorNetwork, CriticNetwork
 from plotting import Plotting
+import torch as T
 import torch.optim as optim
-
-class GenericAgent(object):
-    def __init__(self, input_dim, output_dim, lr=0.000005, gamma=0.99):
-        self.actor = Actor(input_dim, output_dim)
-        self.critic = Critic(input_dim)
-        self.optimizer = optim.Adam(self.actor.parameters(), lr=lr)
-        self.optimizer_c = optim.Adam(self.critic.parameters(), lr=0.00001)
-        self.gamma = gamma
-        self.output_dim = output_dim
-        self.plot = Plotting()
-        self.log_probs = []
-
-    def select_action(self, state):
-        state = T.FloatTensor(state)
-
-        action, action2 = self.actor.forward(state) 
-        
-        action_probs = T.distributions.Normal(loc=action[0], scale= T.abs(action[1])) 
-        action2_probs = T.distributions.Normal(loc=action2[0], scale= T.abs(action2[1])) 
-        
-        probs = action_probs.sample(sample_shape=T.Size([1]))
-        probs2 = action2_probs.sample(sample_shape=T.Size([1]))
-
-        action_ = T.tanh(probs)
-        action2_ = T.tanh(probs2)
-
-        self.log_probs = []
-        self.log_probs.append(action_)
-        self.log_probs.append(action2_)
-        
-        return action_, action2_
-        
-    def update(self, state, reward, next_state):
-        self.optimizer.zero_grad()
-        self.optimizer_c.zero_grad()
-
-        state = T.FloatTensor(state)
-        next_state = T.FloatTensor(next_state)
-        reward = T.FloatTensor([reward])
-
-        # Compute the TD error
-        critic_next_state = self.critic(next_state)
-        critic_state = self.critic(state)    
-
-        td_error = reward + self.gamma * critic_next_state - critic_state
-
-        # Actor loss
-        actor_loss = 0
-
-        for prob in self.log_probs:
-            h = -prob*td_error
-            actor_loss += h
-
-        # Critic loss
-        critic_loss = T.square(td_error)
-
-        # Total loss
-        total_loss = actor_loss + critic_loss
-        total_loss = total_loss.mean()
-        # Update the network
-        print(total_loss)
-        
-        total_loss.backward()
-        self.optimizer.step()
-        self.optimizer_c.step()
-
-    # Plotitng of the graph.
-    def check_plot(self, laps_history):
-        self.plot.plot_laps(laps_history)
-
 import torch.nn as nn
+import numpy as np
+import torch.nn.functional as F
+
+class OUActionNoise(object):
+    def __init__(self, mu, sigma = 0.15, theta = 0.2, dt = 1e-2, x0=None):
+        self.theta = theta
+        self.mu = mu
+        self.sigma = sigma
+        self.dt = dt
+        self.x0 = x0
+        self.reset()
+
+    def __call__(self):
+        x = self.x_prev + self.theta * (self.mu - self.x_prev) * self.dt + self.sigma * \
+            np.sqrt(self.dt) * np.random.normal(size=self.mu.shape)
+        self.x_prev = x
+        return x
+    
+    def reset(self):
+        self.x_prev = self.x0 if self.x0 is not None else np.zeros_like(self.mu)
+
+class ReplayBuffer():
+    def __init__(self, max_size, input_shape, n_actions):
+        self.mem_size = max_size
+        self.mem_cntr = 0
+        self.state_memory = np.zeros((self.mem_size, *input_shape))
+        self.new_state_memory = np.zeros((self.mem_size, *input_shape))
+        self.action_memory = np.zeros((self.mem_size, n_actions))
+        self.reward_memory = np.zeros(self.mem_size)
+        self.terminal_memory = np.zeros(self.mem_size, dtype=bool)
+
+    def store_transition(self, state, action, reward, state_, done):
+        index = self.mem_cntr % self.mem_size
+        self.state_memory[index] = state
+        self.action_memory[index] = action
+        self.reward_memory[index] = reward
+        self.new_state_memory[index] = state_
+        self.terminal_memory[index] = done
+
+        self.mem_cntr += 1
+
+    def sample_buffer(self, batch_size):
+        max_mem = min(self.mem_cntr, self.mem_size)
+
+        batch = np.random.choice(max_mem, batch_size)
+
+        states = self.state_memory[batch]
+        actions = self.action_memory[batch]
+        rewards = self.reward_memory[batch]
+        states_ = self.new_state_memory[batch]
+        dones = self.terminal_memory[batch]
+
+        return states, actions, rewards, states_, dones
 
 class MADDPGAgent:
     def __init__(self, state_dim, action_dim):
@@ -83,44 +66,23 @@ class MADDPGAgent:
         self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=0.00001)
         self.action = None
 
+
     def select_action(self, state):
         state = T.FloatTensor(state)
         self.action =  self.actor(state)
-
         action_probs = T.distributions.Normal(loc=self.action[0], scale= T.abs(self.action[1])) 
         
         probs = action_probs.sample(sample_shape=T.Size([1]))
-
         action_ = T.tanh(probs)
 
         return action_
 
-    def update(self, state, action, reward, next_state):
+    def update(self, state, reward, next_state):
+
         state = T.FloatTensor(state)
         next_state = T.FloatTensor(next_state)
         reward = T.FloatTensor([reward])
-        action = T.FloatTensor(action)
-
-        # critic_next_state = self.critic(next_state)
-        # critic_state = self.critic(state)    
-
-        # td_error = reward + 0.99 * critic_next_state - critic_state
-
-        # # Critic loss
-        # critic_loss = T.square(td_error)
-
-        # # Update the actor
-        # actor_loss = - action * td_error
         
-        # self.actor_optimizer.zero_grad()
-        # self.critic_optimizer.zero_grad()
-
-        # (critic_loss+actor_loss).backward()
-
-        # self.actor_optimizer.step()
-        # self.critic_optimizer.step()
-
-
         Q_target = reward + 0.99 * self.critic(next_state, self.actor(next_state))
         Q_current = self.critic(state, self.action)
         critic_loss = nn.MSELoss()(Q_current, Q_target)
@@ -135,5 +97,123 @@ class MADDPGAgent:
         self.actor_optimizer.step()
 
     # Plotitng of the graph.
+    def check_plot(self, laps_history):
+        self.plot.plot_laps(laps_history)
+
+class Agent():
+    def __init__(self, alpha, beta, input_dims, tau, n_actions, gamma=0.99,
+                 max_size=1000000, fc1_dims=400, fc2_dims=300, 
+                 batch_size=64):
+        self.gamma = gamma
+        self.tau = tau
+        self.batch_size = batch_size
+        self.alpha = alpha
+        self.beta = beta
+        self.plot = Plotting()
+
+        self.memory = ReplayBuffer(max_size, input_dims, n_actions)
+
+        self.noise = OUActionNoise(mu=np.zeros(n_actions))
+
+        self.actor = ActorNetwork(alpha, input_dims, fc1_dims, fc2_dims,
+                                n_actions=n_actions, name='actor')
+        self.critic = CriticNetwork(beta, input_dims, fc1_dims, fc2_dims,
+                                n_actions=n_actions, name='critic')
+
+        self.target_actor = ActorNetwork(alpha, input_dims, fc1_dims, fc2_dims,
+                                n_actions=n_actions, name='target_actor')
+
+        self.target_critic = CriticNetwork(beta, input_dims, fc1_dims, fc2_dims,
+                                n_actions=n_actions, name='target_critic')
+
+        self.update_network_parameters(tau=1)
+
+    def choose_action(self, observation):
+        self.actor.eval()
+        state = T.tensor([observation], dtype=T.float).to(self.actor.device)
+        mu = self.actor.forward(state).to(self.actor.device)
+        mu_prime = mu + T.tensor(self.noise(), 
+                                    dtype=T.float).to(self.actor.device)
+        self.actor.train()
+
+        return mu_prime.cpu().detach().numpy()[0]
+
+    def remember(self, state, action, reward, state_, done):
+        self.memory.store_transition(state, action, reward, state_, done)
+
+    def save_models(self):
+        self.actor.save_checkpoint()
+        self.target_actor.save_checkpoint()
+        self.critic.save_checkpoint()
+        self.target_critic.save_checkpoint()
+
+    def load_models(self):
+        self.actor.load_checkpoint()
+        self.target_actor.load_checkpoint()
+        self.critic.load_checkpoint()
+        self.target_critic.load_checkpoint()
+
+    def learn(self):
+        if self.memory.mem_cntr < self.batch_size:
+            return
+
+        states, actions, rewards, states_, done = \
+                self.memory.sample_buffer(self.batch_size)
+
+        states = T.tensor(states, dtype=T.float).to(self.actor.device)
+        states_ = T.tensor(states_, dtype=T.float).to(self.actor.device)
+        actions = T.tensor(actions, dtype=T.float).to(self.actor.device)
+        rewards = T.tensor(rewards, dtype=T.float).to(self.actor.device)
+        done = T.tensor(done).to(self.actor.device)
+
+        target_actions = self.target_actor.forward(states_)
+        critic_value_ = self.target_critic.forward(states_, target_actions)
+        critic_value = self.critic.forward(states, actions)
+
+        critic_value_[done] = 0.0
+        critic_value_ = critic_value_.view(-1)
+
+        target = rewards + self.gamma*critic_value_
+        target = target.view(self.batch_size, 1)
+
+        self.critic.optimizer.zero_grad()
+        critic_loss = F.mse_loss(target, critic_value)
+        critic_loss.backward()
+        self.critic.optimizer.step()
+
+        self.actor.optimizer.zero_grad()
+        actor_loss = -self.critic.forward(states, self.actor.forward(states))
+        actor_loss = T.mean(actor_loss)
+        actor_loss.backward()
+        self.actor.optimizer.step()
+
+        self.update_network_parameters()
+
+    def update_network_parameters(self, tau=None):
+        if tau is None:
+            tau = self.tau
+
+        actor_params = self.actor.named_parameters()
+        critic_params = self.critic.named_parameters()
+        target_actor_params = self.target_actor.named_parameters()
+        target_critic_params = self.target_critic.named_parameters()
+
+        critic_state_dict = dict(critic_params)
+        actor_state_dict = dict(actor_params)
+        target_critic_state_dict = dict(target_critic_params)
+        target_actor_state_dict = dict(target_actor_params)
+
+        for name in critic_state_dict:
+            critic_state_dict[name] = tau*critic_state_dict[name].clone() + \
+                                (1-tau)*target_critic_state_dict[name].clone()
+
+        for name in actor_state_dict:
+             actor_state_dict[name] = tau*actor_state_dict[name].clone() + \
+                                 (1-tau)*target_actor_state_dict[name].clone()
+
+        self.target_critic.load_state_dict(critic_state_dict)
+        self.target_actor.load_state_dict(actor_state_dict)
+        #self.target_critic.load_state_dict(critic_state_dict, strict=False)
+        #self.target_actor.load_state_dict(actor_state_dict, strict=False)
     def check_plot(self, laps_history):
         self.plot.plot_laps(laps_history)

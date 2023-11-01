@@ -41,8 +41,6 @@ class DeepQLearining():
 
             robot_helper.check_going_backwards(robot.orientation, robot.position)
 
-            #robot_helper.check_proximity(robot)
-
             robot_helper.check_wrong_way()
 
             # CALCULATION OF BELLMAN
