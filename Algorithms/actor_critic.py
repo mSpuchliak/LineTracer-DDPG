@@ -1,8 +1,11 @@
 from pyrep import PyRep
-from generic_agent import MADDPGAgent, Agent
+from generic_agent import Agent
 from scene_factory import SceneFactory
 from line_tracer import LineTracerModel
 from line_tracer_helper import LineTracerHelper
+import torch as T
+
+from statistics import mean
 
 class ActorCritic():
     def start(self):
@@ -20,10 +23,10 @@ class ActorCritic():
 
         agent.noise.reset()
 
-
         robot_helper = LineTracerHelper(scene)
-        robot = LineTracerModel()
+        robot = LineTracerModel()   
 
+        
         done = False
         while not done:
             # STATE
@@ -34,12 +37,14 @@ class ActorCritic():
 
             command2 = [action_l, action_r]
 
-            action_l2 = action_l + 2
-            action_r2 = action_r + 2
+            sigmoid_output = T.sigmoid(T.tensor(action_l))
+            scaled_output = 4 * sigmoid_output + 1
 
-            # setting command to the wheels
-            command = [action_l2, action_r2]
-            
+            sigmoid_outputr = T.sigmoid(T.tensor(action_r))
+            scaled_outputr = 4 * sigmoid_outputr + 1
+
+            command = [scaled_output, scaled_outputr]
+
             robot.set_joint_target_velocities(command)
             pr.step()
 
@@ -54,15 +59,21 @@ class ActorCritic():
             robot_helper.check_going_backwards(robot.orientation, robot.position)
 
             robot_helper.check_wrong_way()
+
+            robot_helper.speed_check(command)
             
             print(command[0],command[1], robot_helper.reward)
+                
             agent.remember(robot.state, command2, robot_helper.reward, robot.new_state, done)
             agent.learn()
 
             if(robot_helper.round_done):
                 robot.set_pose(scene.starting_position)
-                agent.check_plot(robot_helper.laps_history)
                 robot_helper.round_done = False
+                robot_helper.speed_history.append(mean(robot_helper.lap_speed_history))
+                robot_helper.lap_speed_history.clear
+
+                agent.plot_laps_and_speed(robot_helper.speed_history, robot_helper.laps_history)
 
         pr.stop()
         pr.shutdown()

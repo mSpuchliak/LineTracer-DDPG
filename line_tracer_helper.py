@@ -3,7 +3,11 @@ class LineTracerHelper:
         self.reward = 0
         self.scene = scene
         self.wrong_way_counter = 0
+        self.speed = 0
+
         self.laps_history = []
+        self.speed_history = []
+        self.lap_speed_history = []
 
         self.checkpoint_1_done = False
         self.checkpoint_2_done = False
@@ -16,6 +20,7 @@ class LineTracerHelper:
         self.off_track_reward = -5
         self.completed_round_reward = 400
         self.failed_to_complete_reward = -400
+        
     
     # Creating a command to be executed by the robot according to the action.
     def create_command(self, action):
@@ -27,7 +32,7 @@ class LineTracerHelper:
 
         elif action == 2:
             command = [1, 1]
-        
+
         else:
             command = [0, 0]
 
@@ -114,5 +119,29 @@ class LineTracerHelper:
         if(p_front < 1.5 or p_right < 1.5 or p_left < 1.5):
             self.reward -= 10
             print("Too close to walker" + str(p_front) + "|" + str(p_left) + "|" + str(p_right))
+
         else:
             print("Good distance")
+
+    def speed_bonus(self):
+
+        if(self.speed > 6.5 and self.speed < 7):
+            self.reward += 15
+
+        elif(self.speed > 7 and self.speed < 8):
+            self.reward += 50
+
+        elif(self.speed > 8):
+            self.reward += 70
+
+    def speed_check(self, wheels_speed):
+
+        self.speed = wheels_speed[0] + wheels_speed[1]
+        self.lap_speed_history.append(self.speed.item())
+
+        if(self.reward != self.both_sensor_reward):
+            return
+        
+        self.speed_bonus()
+
+            

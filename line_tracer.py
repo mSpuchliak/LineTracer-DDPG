@@ -102,14 +102,14 @@ class LineTracerModel(MobileBase):
     
     # Check for malfunction of sensors, for state.
     def check_sensor_malfunction(self):
-        if(self.correct_rows_count_l + self.correct_rows_count_r == 0 and self.correct_rows_count_l_new + self.correct_rows_count_r_new > 15):
+        if(self.correct_rows_count_l + self.correct_rows_count_r == 0 and self.correct_rows_count_l_new + self.correct_rows_count_r_new > 20):
             return True
         else:
             return False
         
     # Check for malfunction of sensors, for new state.
     def check_sensor_malfunction_new(self):
-        if(self.correct_rows_count_l_new + self.correct_rows_count_r_new == 0 and self.correct_rows_count_l + self.correct_rows_count_r > 15):
+        if(self.correct_rows_count_l_new + self.correct_rows_count_r_new == 0 and self.correct_rows_count_l + self.correct_rows_count_r > 20):
             return True
         else:
             return False

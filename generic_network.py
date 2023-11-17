@@ -5,31 +5,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-class Actor(nn.Module):
-    def __init__(self, state_dim, action_dim):
-        super(Actor, self).__init__()
-        self.fc1 = nn.Linear(state_dim, 1000)
-        self.fc2 = nn.Linear(1000,500)
-        self.fc3 = nn.Linear(500, action_dim)
-
-    def forward(self, state):
-        x = T.relu(self.fc1(state))
-        x = T.relu(self.fc2(x))
-        return T.tanh(self.fc3(x))
-
-class Critic(nn.Module):
-    def __init__(self, state_dim, action_dim):
-        super(Critic, self).__init__()
-        self.fc1 = nn.Linear(state_dim + action_dim, 1000)
-        self.fc2 = nn.Linear(1000, 500)
-        self.fc3 = nn.Linear(500, 1)
-
-    def forward(self, state, action):
-        x = T.cat([state, action], dim=-1)
-        x = T.relu(self.fc1(x))
-        x = T.relu(self.fc2(x))
-        return self.fc3(x)
-
 class CriticNetwork(nn.Module):
     def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name,
                  chkpt_dir='tmp/ddpg'):

@@ -1,4 +1,4 @@
-from generic_network import Actor, Critic, ActorNetwork, CriticNetwork
+from generic_network import ActorNetwork, CriticNetwork
 from plotting import Plotting
 import torch as T
 import torch.optim as optim
@@ -56,49 +56,6 @@ class ReplayBuffer():
         dones = self.terminal_memory[batch]
 
         return states, actions, rewards, states_, dones
-
-class MADDPGAgent:
-    def __init__(self, state_dim, action_dim):
-        self.actor = Actor(state_dim, action_dim)
-        self.plot = Plotting()
-        self.critic = Critic(state_dim, action_dim)  # Joint state for both agents
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=0.00001)
-        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=0.00001)
-        self.action = None
-
-
-    def select_action(self, state):
-        state = T.FloatTensor(state)
-        self.action =  self.actor(state)
-        action_probs = T.distributions.Normal(loc=self.action[0], scale= T.abs(self.action[1])) 
-        
-        probs = action_probs.sample(sample_shape=T.Size([1]))
-        action_ = T.tanh(probs)
-
-        return action_
-
-    def update(self, state, reward, next_state):
-
-        state = T.FloatTensor(state)
-        next_state = T.FloatTensor(next_state)
-        reward = T.FloatTensor([reward])
-        
-        Q_target = reward + 0.99 * self.critic(next_state, self.actor(next_state))
-        Q_current = self.critic(state, self.action)
-        critic_loss = nn.MSELoss()(Q_current, Q_target)
-        self.critic_optimizer.zero_grad()
-        critic_loss.backward()
-        self.critic_optimizer.step()
-
-        # Update the actor
-        actor_loss = -self.critic(state, self.actor(state)).mean()
-        self.actor_optimizer.zero_grad()
-        actor_loss.backward()
-        self.actor_optimizer.step()
-
-    # Plotitng of the graph.
-    def check_plot(self, laps_history):
-        self.plot.plot_laps(laps_history)
 
 class Agent():
     def __init__(self, alpha, beta, input_dims, tau, n_actions, gamma=0.99,
@@ -215,5 +172,9 @@ class Agent():
         self.target_actor.load_state_dict(actor_state_dict)
         #self.target_critic.load_state_dict(critic_state_dict, strict=False)
         #self.target_actor.load_state_dict(actor_state_dict, strict=False)
+        
     def check_plot(self, laps_history):
         self.plot.plot_laps(laps_history)
+    
+    def plot_laps_and_speed(self, laps_history, speed_history):
+        self.plot.plot_laps_and_speed(laps_history, speed_history)
