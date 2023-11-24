@@ -27,7 +27,7 @@ class Plotting:
         # Create subplot 2
         plt.subplot(2, 1, 2)
         plt.xlabel('Number of starts')
-        plt.ylabel('Has finished the round')
+        plt.ylabel('Sum of the speed of both wheels')
         plt.plot(speed_history)
 
         plt.show(block=False)

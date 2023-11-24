@@ -2,7 +2,7 @@ from algorithm_factory import AlgorithmFactory
 
 def main():
     algorithm = AlgorithmFactory()
-    algorithm.choose_algorithm('ActorCritic')
+    algorithm.choose_algorithm('DeepQLearining')
     
 if __name__ == "__main__":
     main()

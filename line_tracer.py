@@ -34,7 +34,7 @@ class LineTracerModel(MobileBase):
         self.right_sensor_state = []
 
     # Getting value pixels of sensors
-    def get_state(self):
+    def get_state(self, iter_counter):
         self.left_sensor_state = self.left_sensor.capture_rgb()
         self.right_sensor_state = self.right_sensor.capture_rgb()        
 
@@ -44,11 +44,11 @@ class LineTracerModel(MobileBase):
         self.orientation = self.get_orientation().tolist()
         self.position = self.get_pose()
 
-        return lstate + rstate + [self.orientation[0], self.orientation[1]] + [self.position[0], self.position[1]]
+        return lstate + rstate + [self.orientation[0], self.orientation[1]] + [self.position[0], self.position[1]] + [iter_counter]
     
     # Setting state and count of correct rows for both of sensors
-    def set_state(self):
-        self.state = self.get_state()
+    def set_state(self, iter_counter):
+        self.state = self.get_state(iter_counter)
 
         self.correct_rows_count_l = self.calc_correct_rows(self.left_sensor_state)
         self.correct_rows_count_r = self.calc_correct_rows(self.right_sensor_state)
@@ -59,8 +59,8 @@ class LineTracerModel(MobileBase):
             self.correct_rows_count_l = self.correct_rows_count_l_new 
     
     # Setting new state and count of correct rows for both of sensors
-    def set_new_state(self):
-        self.new_state = self.get_state()
+    def set_new_state(self, iter_counter):
+        self.new_state = self.get_state(iter_counter)
 
         self.correct_rows_count_l_new = self.calc_correct_rows(self.left_sensor_state)
         self.correct_rows_count_r_new = self.calc_correct_rows(self.right_sensor_state)

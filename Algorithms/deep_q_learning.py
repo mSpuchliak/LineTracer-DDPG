@@ -18,6 +18,7 @@ class DeepQLearining():
         robot_helper = LineTracerHelper(scene)  
         robot = LineTracerModel()
 
+        iter_counter = 0
         done = False
         while not done:
             # STATE

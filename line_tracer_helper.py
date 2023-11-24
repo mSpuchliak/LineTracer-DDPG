@@ -76,7 +76,7 @@ class LineTracerHelper:
         if(position[1] > self.scene.starting_position[1] and self.checkpoint_1_done and self.checkpoint_2_done and self.checkpoint_3_done):
             self.reset_checkpoints()
             self.laps_history.append(1)
-            self.reward = self.completed_round_reward
+            self.reward = self.completed_round_reward 
             self.round_done = True
     
     # Check the position and rotation of the robot, if it is not going in the opposite direction.
@@ -124,7 +124,7 @@ class LineTracerHelper:
             print("Good distance")
 
     def speed_bonus(self):
-
+        return
         if(self.speed > 6.5 and self.speed < 7):
             self.reward += 15
 

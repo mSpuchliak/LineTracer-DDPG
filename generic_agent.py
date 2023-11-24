@@ -1,8 +1,6 @@
 from generic_network import ActorNetwork, CriticNetwork
 from plotting import Plotting
 import torch as T
-import torch.optim as optim
-import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
 
@@ -34,13 +32,12 @@ class ReplayBuffer():
         self.reward_memory = np.zeros(self.mem_size)
         self.terminal_memory = np.zeros(self.mem_size, dtype=bool)
 
-    def store_transition(self, state, action, reward, state_, done):
+    def store_transition(self, state, action, reward, state_):
         index = self.mem_cntr % self.mem_size
         self.state_memory[index] = state
         self.action_memory[index] = action
         self.reward_memory[index] = reward
         self.new_state_memory[index] = state_
-        self.terminal_memory[index] = done
 
         self.mem_cntr += 1
 
@@ -53,9 +50,8 @@ class ReplayBuffer():
         actions = self.action_memory[batch]
         rewards = self.reward_memory[batch]
         states_ = self.new_state_memory[batch]
-        dones = self.terminal_memory[batch]
 
-        return states, actions, rewards, states_, dones
+        return states, actions, rewards, states_
 
 class Agent():
     def __init__(self, alpha, beta, input_dims, tau, n_actions, gamma=0.99,
@@ -95,8 +91,8 @@ class Agent():
 
         return mu_prime.cpu().detach().numpy()[0]
 
-    def remember(self, state, action, reward, state_, done):
-        self.memory.store_transition(state, action, reward, state_, done)
+    def remember(self, state, action, reward, state_):
+        self.memory.store_transition(state, action, reward, state_)
 
     def save_models(self):
         self.actor.save_checkpoint()
@@ -114,20 +110,19 @@ class Agent():
         if self.memory.mem_cntr < self.batch_size:
             return
 
-        states, actions, rewards, states_, done = \
+        states, actions, rewards, states_ = \
                 self.memory.sample_buffer(self.batch_size)
 
         states = T.tensor(states, dtype=T.float).to(self.actor.device)
         states_ = T.tensor(states_, dtype=T.float).to(self.actor.device)
         actions = T.tensor(actions, dtype=T.float).to(self.actor.device)
         rewards = T.tensor(rewards, dtype=T.float).to(self.actor.device)
-        done = T.tensor(done).to(self.actor.device)
 
         target_actions = self.target_actor.forward(states_)
         critic_value_ = self.target_critic.forward(states_, target_actions)
         critic_value = self.critic.forward(states, actions)
 
-        critic_value_[done] = 0.0
+        critic_value_[0] = 0.0
         critic_value_ = critic_value_.view(-1)
 
         target = rewards + self.gamma*critic_value_
