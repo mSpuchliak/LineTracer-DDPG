@@ -1,8 +1,14 @@
-from algorithm_factory import AlgorithmFactory
+from Factories.algorithm_factory import AlgorithmFactory
+from Factories.scene_factory import SceneFactory
 
 def main():
-    algorithm = AlgorithmFactory()
-    algorithm.choose_algorithm('DeepQLearining')
+    scene_factory = SceneFactory()
+    scene = scene_factory.choose_scene('Curve')
+
+    algorithm_factory = AlgorithmFactory(scene)
+    algorithm = algorithm_factory.choose_algorithm('DQL')
+
+    algorithm.start()
     
 if __name__ == "__main__":
     main()

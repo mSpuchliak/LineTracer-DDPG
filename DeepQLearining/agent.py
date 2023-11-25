@@ -2,9 +2,9 @@ import numpy as np
 import random
 import torch
 from collections import deque
-from epsilon import Epsilon 
-from neural_network import NeuralNetwork
-from trainer import Trainer
+from DeepQLearining.epsilon import Epsilon 
+from DeepQLearining.neural_network import NeuralNetwork
+from DeepQLearining.trainer import Trainer
 from plotting import Plotting
 
 MAX_MEMORY = 100000
@@ -31,6 +31,22 @@ class Agent():
             action = torch.argmax(actions).item()
 
         return action
+            
+    # Creating a command to be executed by the robot according to the action.
+    def create_command(self, action):
+        if action == 0:
+            command = [1, 0]
+
+        elif action == 1:
+            command = [0, 1]
+
+        elif action == 2:
+            command = [1, 1]
+
+        else:
+            command = [0, 0]
+
+        return command
 
     # Prepearment to batch informatons for the bellman equasion.
     def target_memory(self, state, action, reward, new_state):

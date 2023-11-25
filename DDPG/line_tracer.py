@@ -3,6 +3,8 @@ from pyrep.objects.vision_sensor import VisionSensor
 from pyrep.objects.proximity_sensor import ProximitySensor
 from pyrep.objects.shape import Shape
 
+from reward_asigner import RewardAsigner
+
 class LineTracerModel(MobileBase):
     def __init__(self, count: int = 0):
         super().__init__(count, 2, 'LineTracer')
@@ -25,6 +27,8 @@ class LineTracerModel(MobileBase):
         self.state = []
         self.new_state = []
 
+        self.reward = 0
+
         self.correct_rows_count_l = 0
         self.correct_rows_count_r = 0
         self.correct_rows_count_l_new = 0
@@ -33,8 +37,11 @@ class LineTracerModel(MobileBase):
         self.left_sensor_state = []
         self.right_sensor_state = []
 
+        self.iteration_counter = 0
+        self.iteration_incrementer = 0.1
+
     # Getting value pixels of sensors
-    def get_state(self, iter_counter):
+    def get_state(self):
         self.left_sensor_state = self.left_sensor.capture_rgb()
         self.right_sensor_state = self.right_sensor.capture_rgb()        
 
@@ -44,11 +51,11 @@ class LineTracerModel(MobileBase):
         self.orientation = self.get_orientation().tolist()
         self.position = self.get_pose()
 
-        return lstate + rstate + [self.orientation[0], self.orientation[1]] + [self.position[0], self.position[1]] + [iter_counter]
+        return lstate + rstate + [self.orientation[0], self.orientation[1]] + [self.position[0], self.position[1]] + [self.iteration_counter]
     
     # Setting state and count of correct rows for both of sensors
-    def set_state(self, iter_counter):
-        self.state = self.get_state(iter_counter)
+    def set_state(self):
+        self.state = self.get_state()
 
         self.correct_rows_count_l = self.calc_correct_rows(self.left_sensor_state)
         self.correct_rows_count_r = self.calc_correct_rows(self.right_sensor_state)
@@ -59,8 +66,8 @@ class LineTracerModel(MobileBase):
             self.correct_rows_count_l = self.correct_rows_count_l_new 
     
     # Setting new state and count of correct rows for both of sensors
-    def set_new_state(self, iter_counter):
-        self.new_state = self.get_state(iter_counter)
+    def set_new_state(self):
+        self.new_state = self.get_state()
 
         self.correct_rows_count_l_new = self.calc_correct_rows(self.left_sensor_state)
         self.correct_rows_count_r_new = self.calc_correct_rows(self.right_sensor_state)
@@ -113,3 +120,30 @@ class LineTracerModel(MobileBase):
             return True
         else:
             return False
+        
+    def set_reward_asigner(self, scene):
+        self.scene = scene
+        self.reward_asigner = RewardAsigner(scene)  
+
+    def prepeare_for_next_iter(self):
+        self.iteration_counter += self.iteration_incrementer
+        
+        # Reseting position and ploting if robot has ended it's round
+        if(self.reward_asigner.check_round_done()):
+            self.set_pose(self.scene.starting_position)
+            self.iteration_counter = 0
+
+    def get_reward(self, command):
+        self.reward = self.reward_asigner.check_state(self.correct_rows_count_l_new, self.correct_rows_count_r_new)
+
+        self.reward += self.reward_asigner.check_going_backwards(self.orientation, self.position)
+
+        self.reward += self.reward_asigner.check_checkpoints(self.position)
+
+        self.reward += self.reward_asigner.check_wrong_way()
+
+        self.reward_asigner.speed_check(command)
+
+        self.reward -= self.iteration_counter
+
+        return self.reward

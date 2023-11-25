@@ -1,5 +1,4 @@
-from generic_network import ActorNetwork, CriticNetwork
-from plotting import Plotting
+from DDPG.generic_network import ActorNetwork, CriticNetwork
 import torch as T
 import numpy as np
 import torch.nn.functional as F
@@ -62,7 +61,7 @@ class Agent():
         self.batch_size = batch_size
         self.alpha = alpha
         self.beta = beta
-        self.plot = Plotting()
+        
 
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
 
@@ -167,9 +166,12 @@ class Agent():
         self.target_actor.load_state_dict(actor_state_dict)
         #self.target_critic.load_state_dict(critic_state_dict, strict=False)
         #self.target_actor.load_state_dict(actor_state_dict, strict=False)
-        
-    def check_plot(self, laps_history):
-        self.plot.plot_laps(laps_history)
     
-    def plot_laps_and_speed(self, laps_history, speed_history):
-        self.plot.plot_laps_and_speed(laps_history, speed_history)
+    def scale_action(self, action_l, action_r):
+        sigmoid_output = T.sigmoid(T.tensor(action_l))
+        scaled_action_l = 4 * sigmoid_output + 1
+
+        sigmoid_outputr = T.sigmoid(T.tensor(action_r))
+        scaled_action_r = 4 * sigmoid_outputr + 1
+
+        return scaled_action_l, scaled_action_r
