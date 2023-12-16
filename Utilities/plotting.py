@@ -16,7 +16,7 @@ class Plotting:
     
     def add_to_avg_lap_speed_history(self):
         self.avg_lap_speed_history.append(mean(self.lap_speed_history))
-        self.lap_speed_history.clear
+        self.lap_speed_history.clear()
 
     def plot_laps(self):
         display.clear_output(wait=True)

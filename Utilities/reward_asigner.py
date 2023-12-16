@@ -1,4 +1,4 @@
-from plotting import Plotting
+from Utilities.plotting import Plotting
 
 class RewardAsigner:
     def __init__(self, scene):
@@ -18,21 +18,21 @@ class RewardAsigner:
         self.off_track_reward = -5
         self.completed_round_reward = 400
         self.failed_to_complete_reward = -400
+        self.reward = 0
     
     # Check for the status of the robot, and assigning a reward for the current status.
     def check_state(self, correct_rows_count_l, correct_rows_count_r):
-
         if(correct_rows_count_l > 8 and correct_rows_count_r > 8):
             self.wrong_way_counter = 0
-            return self.both_sensor_reward
+            self.reward = self.both_sensor_reward
 
         elif(correct_rows_count_l > 8 or correct_rows_count_r > 8):
             self.wrong_way_counter = 0
-            return self.one_sensor_reward
+            self.reward = self.one_sensor_reward
 
         else:
             self.wrong_way_counter += 1
-            return self.off_track_reward
+            self.reward = self.off_track_reward
             
     # Check for the position of the robot, if the robot does not go too long in the wrong direction.
     def check_wrong_way(self):
@@ -42,9 +42,7 @@ class RewardAsigner:
             self.plot.add_to_laps_history(0)
             self.round_done = True
 
-            return self.failed_to_complete_reward
-        
-        return 0
+            self.reward = self.failed_to_complete_reward
 
     # Check for the position of the robot, to be able to tell when the robot will pass the whole path.
     def check_checkpoints(self, position):
@@ -61,9 +59,7 @@ class RewardAsigner:
             self.reset_checkpoints()
             self.plot.add_to_laps_history(1)
             self.round_done = True
-            return self.completed_round_reward 
-        else:
-            return 0
+            self.reward = self.completed_round_reward 
     
     # Check the position and rotation of the robot, if it is not going in the opposite direction.
     def check_going_backwards(self, orientation, position):
@@ -71,28 +67,26 @@ class RewardAsigner:
             if not(orientation[0] > 0 or orientation[1] > 0):
                 self.wrong_way_counter += 1
                 self.reset_checkpoints()
-                return self.going_backwards_reward
+                self.reward = self.going_backwards_reward
         
         if(position[0] < 0 and position[1] > 0):
             if not(orientation[0] > 0 or orientation[1] < 0):
                 self.wrong_way_counter += 1
                 self.reset_checkpoints()
-                return self.going_backwards_reward
+                self.reward = self.going_backwards_reward
         
         if(position[0] > 0 and position[1] > 0):
             if not(orientation[0] < 0 or orientation[1] < 0):
                 self.wrong_way_counter += 1
                 self.reset_checkpoints()
-                return self.going_backwards_reward
+                self.reward = self.going_backwards_reward
 
         if(position[0] > 0 and position[1] < 0):
             if not(orientation[0] < 0 or orientation[1] > 0):
                 self.wrong_way_counter += 1
                 self.reset_checkpoints()
-                return self.going_backwards_reward
-            
-        return 0
-    
+                self.reward = self.going_backwards_reward
+
     # Reset of checkpoints.
     def reset_checkpoints(self):
         self.checkpoint_1_done = False
@@ -134,5 +128,5 @@ class RewardAsigner:
         self.speed = wheels_speed[0] + wheels_speed[1]
         self.plot.add_to_lap_speed_history(self.speed.item())
 
-
-            
+    def get_reward(self):
+        return self.reward

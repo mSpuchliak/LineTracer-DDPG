@@ -1,5 +1,5 @@
 from Abstract.algorithm import Algorithm
-from DDPG.generic_agent import Agent
+from DDPG.agent import Agent
 from DDPG.line_tracer import LineTracerModel
 
 class DDPG(Algorithm):

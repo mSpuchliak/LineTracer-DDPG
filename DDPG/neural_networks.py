@@ -22,8 +22,6 @@ class CriticNetwork(nn.Module):
 
         self.bn1 = nn.LayerNorm(self.fc1_dims)
         self.bn2 = nn.LayerNorm(self.fc2_dims)
-        #self.bn1 = nn.BatchNorm1d(self.fc1_dims)
-        #self.bn2 = nn.BatchNorm1d(self.fc2_dims)
 
         self.action_value = nn.Linear(self.n_actions, self.fc2_dims)
         
@@ -57,11 +55,10 @@ class CriticNetwork(nn.Module):
         state_value = F.relu(state_value)
         state_value = self.fc2(state_value)
         state_value = self.bn2(state_value)
-        #state_value = F.relu(state_value)
-        #action_value = F.relu(self.action_value(action))
+
         action_value = self.action_value(action)
         state_action_value = F.relu(T.add(state_value, action_value))
-        #state_action_value = T.add(state_value, action_value)
+
         state_action_value = self.q(state_action_value)
 
         return state_action_value
@@ -96,9 +93,6 @@ class ActorNetwork(nn.Module):
 
         self.bn1 = nn.LayerNorm(self.fc1_dims)
         self.bn2 = nn.LayerNorm(self.fc2_dims)
-
-        #self.bn1 = nn.BatchNorm1d(self.fc1_dims)
-        #self.bn2 = nn.BatchNorm1d(self.fc2_dims)
 
         self.mu = nn.Linear(self.fc2_dims, self.n_actions)
 

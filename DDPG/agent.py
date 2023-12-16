@@ -1,4 +1,4 @@
-from DDPG.generic_network import ActorNetwork, CriticNetwork
+from DDPG.neural_networks import ActorNetwork, CriticNetwork
 import torch as T
 import numpy as np
 import torch.nn.functional as F

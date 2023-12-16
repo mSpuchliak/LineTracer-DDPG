@@ -5,7 +5,7 @@ from collections import deque
 from DeepQLearining.epsilon import Epsilon 
 from DeepQLearining.neural_network import NeuralNetwork
 from DeepQLearining.trainer import Trainer
-from plotting import Plotting
+from Utilities.plotting import Plotting
 
 MAX_MEMORY = 100000
 BATCH_SIZE = 10000

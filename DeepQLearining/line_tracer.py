@@ -1,7 +1,7 @@
 from pyrep.robots.mobiles.mobile_base import MobileBase
 from pyrep.objects.vision_sensor import VisionSensor
 
-from reward_asigner import RewardAsigner
+from Utilities.reward_asigner import RewardAsigner
 
 class LineTracerModel(MobileBase):
     def __init__(self, count: int = 0):

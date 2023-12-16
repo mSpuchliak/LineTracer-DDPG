@@ -1,9 +1,7 @@
 from pyrep.robots.mobiles.mobile_base import MobileBase
 from pyrep.objects.vision_sensor import VisionSensor
-from pyrep.objects.proximity_sensor import ProximitySensor
-from pyrep.objects.shape import Shape
 
-from reward_asigner import RewardAsigner
+from Utilities.reward_asigner import RewardAsigner
 
 class LineTracerModel(MobileBase):
     def __init__(self, count: int = 0):
@@ -11,19 +9,10 @@ class LineTracerModel(MobileBase):
 
         left_sensor_object = self.get_object('LeftSensor')
         right_sensor_object = self.get_object('RightSensor')
-        #proximity_sensor_front_object = self.get_object('ProximitySensorFront')
-        #proximity_sensor_left_object = self.get_object('ProximitySensorLeft')
-        #proximity_sensor_right_object = self.get_object('ProximitySensorRight')
 
-        # self.proximity_sensor_front = ProximitySensor(proximity_sensor_front_object.get_handle())
-        # self.proximity_sensor_left = ProximitySensor(proximity_sensor_left_object.get_handle())
-        # self.proximity_sensor_right = ProximitySensor(proximity_sensor_right_object.get_handle())
         self.left_sensor = VisionSensor(left_sensor_object.get_handle())
         self.right_sensor = VisionSensor(right_sensor_object.get_handle())
 
-        #cuboid_obejct = self.get_object('Cuboid')
-        #self.cuboid = Shape(cuboid_obejct.get_handle())
-       
         self.state = []
         self.new_state = []
 
@@ -134,13 +123,15 @@ class LineTracerModel(MobileBase):
             self.iteration_counter = 0
 
     def get_reward(self, command):
-        self.reward = self.reward_asigner.check_state(self.correct_rows_count_l_new, self.correct_rows_count_r_new)
+        self.reward_asigner.check_state(self.correct_rows_count_l_new, self.correct_rows_count_r_new)
 
-        self.reward += self.reward_asigner.check_going_backwards(self.orientation, self.position)
+        self.reward_asigner.check_going_backwards(self.orientation, self.position)
 
-        self.reward += self.reward_asigner.check_checkpoints(self.position)
+        self.reward_asigner.check_checkpoints(self.position)
 
-        self.reward += self.reward_asigner.check_wrong_way()
+        self.reward_asigner.check_wrong_way()
+
+        self.reward = self.reward_asigner.get_reward()
 
         self.reward_asigner.speed_check(command)
 

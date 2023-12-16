@@ -6,7 +6,7 @@ def main():
     scene = scene_factory.choose_scene('Curve')
 
     algorithm_factory = AlgorithmFactory(scene)
-    algorithm = algorithm_factory.choose_algorithm('DQL')
+    algorithm = algorithm_factory.choose_algorithm('DDPG')
 
     algorithm.start()
     
