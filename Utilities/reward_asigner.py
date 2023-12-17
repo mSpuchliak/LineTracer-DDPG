@@ -108,7 +108,7 @@ class RewardAsigner:
     def check_round_done(self):
         if(self.round_done):
             self.round_done = False
-            self.plot.add_to_avg_lap_speed_history()
+            self.plot.add_to_lap_speed_history()
             self.plot.plot_laps_and_speed()
 
             return True
@@ -126,7 +126,7 @@ class RewardAsigner:
 
     def speed_check(self, wheels_speed):
         self.speed = wheels_speed[0] + wheels_speed[1]
-        self.plot.add_to_lap_speed_history(self.speed.item())
+        self.plot.add_to_speed_history(self.speed.item())
 
     def get_reward(self):
         return self.reward
