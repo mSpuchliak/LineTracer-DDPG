@@ -1,3 +1,5 @@
+import datetime
+import os
 import matplotlib.pyplot as plt
 from IPython import display
 from statistics import mean
@@ -8,6 +10,7 @@ class Plotting:
         self.speed_history = []
         self.lap_speed_history = []
         self.mean_lap_speed_history = []
+        self.plt = None
     
     def add_to_laps_history(self, round_result):
         self.laps_history.append(round_result)
@@ -48,10 +51,14 @@ class Plotting:
         plt.ylabel('Average speed both wheels')
         plt.plot(self.lap_speed_history)
         plt.plot(self.mean_lap_speed_history)
-
-        # Add a line for the mean of lap_speed_history
-        # mean_speed = mean(self.lap_speed_history)
-        # plt.axhline(y=mean_speed, color='r', linestyle='--', label=f'Mean Speed: {mean_speed:.2f}')
-
+        
         plt.show(block=False)
         plt.pause(.1)
+
+        self.plt = plt.gcf()
+
+    def save_graph(self):
+        current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        name = f"Result graph {current_datetime}.png"
+        filepath = os.path.join(os.getcwd(), "Results", "Graphs", name)
+        self.plt.savefig(filepath)

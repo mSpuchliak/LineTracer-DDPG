@@ -61,7 +61,6 @@ class Agent():
         self.batch_size = batch_size
         self.alpha = alpha
         self.beta = beta
-        
 
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
 
@@ -79,6 +78,7 @@ class Agent():
                                 n_actions=n_actions, name='target_critic')
 
         self.update_network_parameters(tau=1)
+        
 
     def choose_action(self, observation):
         self.actor.eval()
@@ -164,8 +164,6 @@ class Agent():
 
         self.target_critic.load_state_dict(critic_state_dict)
         self.target_actor.load_state_dict(actor_state_dict)
-        #self.target_critic.load_state_dict(critic_state_dict, strict=False)
-        #self.target_actor.load_state_dict(actor_state_dict, strict=False)
     
     def scale_action(self, action_l, action_r):
         sigmoid_output = T.sigmoid(T.tensor(action_l))
@@ -175,3 +173,15 @@ class Agent():
         scaled_action_r = 4 * sigmoid_outputr + 1
 
         return scaled_action_l, scaled_action_r
+    
+    def save_model(self):
+        self.actor.save_checkpoint()
+        self.critic.save_checkpoint()
+        self.target_actor.save_checkpoint()
+        self.target_critic.save_checkpoint()
+    
+    def load_model(self):
+        self.actor.load_checkpoint()
+        self.critic.load_checkpoint()
+        self.target_actor.load_checkpoint()
+        self.target_critic.load_checkpoint()

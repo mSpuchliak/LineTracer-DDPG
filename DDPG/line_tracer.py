@@ -17,6 +17,7 @@ class LineTracerModel(MobileBase):
         self.new_state = []
 
         self.reward = 0
+        self.done = False
 
         self.correct_rows_count_l = 0
         self.correct_rows_count_r = 0
@@ -28,7 +29,9 @@ class LineTracerModel(MobileBase):
 
         self.iteration_counter = 0
         self.iteration_incrementer = 0.1
-
+        self.iteration_counter_max = 100
+        self.finished_rounds_count = 0
+        
     # Getting value pixels of sensors
     def get_state(self):
         self.left_sensor_state = self.left_sensor.capture_rgb()
@@ -40,7 +43,9 @@ class LineTracerModel(MobileBase):
         self.orientation = self.get_orientation().tolist()
         self.position = self.get_pose()
 
-        return lstate + rstate + [self.orientation[0], self.orientation[1]] + [self.position[0], self.position[1]] + [self.iteration_counter]
+        norm_iteration_counter = self.min_max_scaling(self.iteration_counter)
+
+        return lstate + rstate + [self.orientation[0], self.orientation[1]] + [self.position[0], self.position[1]] + [norm_iteration_counter]
     
     # Setting state and count of correct rows for both of sensors
     def set_state(self):
@@ -115,12 +120,16 @@ class LineTracerModel(MobileBase):
         self.reward_asigner = RewardAsigner(scene)  
 
     def prepeare_for_next_iter(self):
-        self.iteration_counter += self.iteration_incrementer
+        if self.iteration_counter < self.iteration_counter_max:
+            self.iteration_counter += self.iteration_incrementer
         
         # Reseting position and ploting if robot has ended it's round
         if(self.reward_asigner.check_round_done()):
             self.set_pose(self.scene.starting_position)
             self.iteration_counter = 0
+            self.finished_rounds_count += 1
+        
+        self.check_if_model_finished()
 
     def get_reward(self, command):
         self.reward_asigner.check_state(self.correct_rows_count_l_new, self.correct_rows_count_r_new)
@@ -131,10 +140,19 @@ class LineTracerModel(MobileBase):
 
         self.reward_asigner.check_wrong_way()
 
-        self.reward = self.reward_asigner.get_reward()
-
         self.reward_asigner.speed_check(command)
+
+        self.reward = self.reward_asigner.get_reward()
 
         self.reward -= self.iteration_counter
 
         return self.reward
+
+    def min_max_scaling(self, value):
+        return (value - 0) / (self.iteration_counter_max - 0)
+    
+    def check_if_model_finished(self):
+        if (self.finished_rounds_count == 500):
+            self.done = True
+            self.reward_asigner.save_graph()
+            

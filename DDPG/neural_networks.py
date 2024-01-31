@@ -7,7 +7,7 @@ import torch.optim as optim
 
 class CriticNetwork(nn.Module):
     def __init__(self, beta, input_dims, fc1_dims, fc2_dims, n_actions, name,
-                 chkpt_dir='tmp/ddpg'):
+                 chkpt_dir='Results/Models'):
         super(CriticNetwork, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
@@ -64,11 +64,9 @@ class CriticNetwork(nn.Module):
         return state_action_value
 
     def save_checkpoint(self):
-        print('... saving checkpoint ...')
         T.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
-        print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
 
     def save_best(self):
@@ -78,7 +76,7 @@ class CriticNetwork(nn.Module):
 
 class ActorNetwork(nn.Module):
     def __init__(self, alpha, input_dims, fc1_dims, fc2_dims, n_actions, name,
-                 chkpt_dir='tmp/ddpg'):
+                 chkpt_dir='Results/Models'):
         super(ActorNetwork, self).__init__()
         self.input_dims = input_dims
         self.fc1_dims = fc1_dims
@@ -125,11 +123,9 @@ class ActorNetwork(nn.Module):
         return x
 
     def save_checkpoint(self):
-        print('... saving checkpoint ...')
         T.save(self.state_dict(), self.checkpoint_file)
 
     def load_checkpoint(self):
-        print('... loading checkpoint ...')
         self.load_state_dict(T.load(self.checkpoint_file))
 
     def save_best(self):

@@ -92,18 +92,6 @@ class RewardAsigner:
         self.checkpoint_1_done = False
         self.checkpoint_2_done = False
         self.checkpoint_3_done = False
-
-    def check_proximity(self, robot_model):
-        p_front = robot_model.proximity_sensor_front.read()
-        p_left = robot_model.proximity_sensor_left.read()
-        p_right = robot_model.proximity_sensor_right.read()
-
-        if(p_front < 1.5 or p_right < 1.5 or p_left < 1.5):
-            #self.reward -= 10
-            print("Too close to walker" + str(p_front) + "|" + str(p_left) + "|" + str(p_right))
-
-        else:
-            print("Good distance")
     
     def check_round_done(self):
         if(self.round_done):
@@ -128,5 +116,24 @@ class RewardAsigner:
         self.speed = wheels_speed[0] + wheels_speed[1]
         self.plot.add_to_speed_history(self.speed.item())
 
+        if(self.reward > self.one_sensor_reward):
+            if(self.speed < 4):
+                self.reward -= 90
+            if(4 < self.speed < 5):
+                self.reward -= 60
+            if(5 < self.speed < 5.5):
+                self.reward -= 30
+            elif(5.5 <= self.speed < 6.0):
+                self.reward -= 10     
+            elif(6 <= self.speed < 6.5):
+                self.reward += 30
+            elif(6.5 <= self.speed < 7.0):
+                self.reward += 50
+            elif(7 >= self.speed):
+                self.reward += 90
+
     def get_reward(self):
         return self.reward
+
+    def save_graph(self):
+        self.plot.save_graph()

@@ -12,9 +12,11 @@ class DDPG(Algorithm):
 
         self.agent = Agent(alpha=0.0001, beta=0.001, input_dims=[517], tau=0.001,
                         batch_size=64, fc1_dims=400, fc2_dims=300, n_actions=2)
+        
+        self.agent.load_model()
         self.agent.noise.reset()        
 
-        while not self.done:
+        while not self.model.done:
             # STATE
             self.model.set_state()
 
@@ -35,7 +37,7 @@ class DDPG(Algorithm):
             reward = self.model.get_reward(command)
 
             # LEARNING
-            print(command[0],command[1], reward)
+            #print(command[0],command[1], reward)
 
             self.agent.remember(self.model.state, [action_l, action_r], reward, self.model.new_state)
             
@@ -43,6 +45,7 @@ class DDPG(Algorithm):
 
             # Prepearment for next iteration
             self.model.prepeare_for_next_iter()
-
+                
+        self.agent.save_model()
         self.pyrep.stop()
         self.pyrep.shutdown()
