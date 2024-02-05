@@ -13,7 +13,7 @@ class DDPG(Algorithm):
         self.agent = Agent(alpha=0.0001, beta=0.001, input_dims=[517], tau=0.001,
                         batch_size=64, fc1_dims=400, fc2_dims=300, n_actions=2)
         
-        self.agent.load_model()
+        #self.agent.load_model()
         self.agent.noise.reset()        
 
         while not self.model.done:
