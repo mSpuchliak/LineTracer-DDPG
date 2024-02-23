@@ -11,6 +11,7 @@ class DeepQLearining(Algorithm):
         self.model.set_reward_asigner(self.scene)
         
         agent = Agent()
+        self.done = False
 
         while not self.done:
             # STATE

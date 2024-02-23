@@ -1,23 +1,21 @@
 import numpy as np
 import random
 import torch
-from collections import deque
 from DeepQLearining.epsilon import Epsilon 
 from DeepQLearining.neural_network import NeuralNetwork
 from DeepQLearining.trainer import Trainer
 from Utilities.plotting import Plotting
+from Utilities.replay_buffer import ReplayBuffer
 
-MAX_MEMORY = 100000
-BATCH_SIZE = 10000
+BATCH_SIZE = 15
 
 class Agent():
     def __init__(self):
-        self.memory = deque(maxlen = MAX_MEMORY)
-        self.short_memory = deque(maxlen = 11)
         self.model = NeuralNetwork(516, 2500, 3)
         self.trainer = Trainer(self.model)
         self.epsilon = Epsilon()
         self.plot = Plotting()
+        self.memory = ReplayBuffer(100000, [516], 1)
     
     # Select actions either by chance or by experience.
     def get_action(self, state):
@@ -42,29 +40,25 @@ class Agent():
 
         elif action == 2:
             command = [1, 1]
-
         else:
             command = [0, 0]
 
         return command
-
-    # Prepearment to batch informatons for the bellman equasion.
+    
     def target_memory(self, state, action, reward, new_state):
-        self.short_memory.append((state, action, reward, new_state))
-        self.memory.append((state, action, reward, new_state))
-        state, action, reward , new_state = zip(*self.short_memory)
-
-        self.trainer.train_step(state, action, reward, new_state, len(self.short_memory))
+        self.memory.store_transition(state, action, reward, new_state)
+        self.trainer.train_step([state], action, [reward], [new_state], 1)
     
     # Use of replay memory.
     def replay_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            sample = random.sample(self.memory, BATCH_SIZE)
-        else:
-            sample = self.memory
-        state, action, reward, next_state = zip(*sample)
+        states, actions, rewards, states_ = \
+                self.memory.sample_buffer(BATCH_SIZE)
         
-        self.trainer.train_step(state, action, reward, next_state, len(sample))
+        actions = [item for sublist in actions for item in sublist]
+        if self.memory.mem_cntr < BATCH_SIZE:
+            return
+        
+        self.trainer.train_step(states.tolist(), actions, rewards.tolist(), states_.tolist(), BATCH_SIZE)
 
     # Plotitng of the graph.
     def check_plot(self, laps_history):
