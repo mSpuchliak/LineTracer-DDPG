@@ -19,7 +19,7 @@ class ReplayBuffer():
 
         self.mem_cntr += 1
 
-    def sample_buffer(self, batch_size):
+    def sample_buffer(self, batch_size, flatten = False):
         max_mem = min(self.mem_cntr, self.mem_size)
 
         batch = np.random.choice(max_mem, batch_size)
@@ -29,4 +29,8 @@ class ReplayBuffer():
         rewards = self.reward_memory[batch]
         states_ = self.new_state_memory[batch]
 
+        if(flatten):
+            actions = [item for sublist in actions for item in sublist]
+
         return states, actions, rewards, states_
+    

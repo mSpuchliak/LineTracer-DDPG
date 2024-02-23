@@ -7,15 +7,14 @@ from DeepQLearining.trainer import Trainer
 from Utilities.plotting import Plotting
 from Utilities.replay_buffer import ReplayBuffer
 
-BATCH_SIZE = 15
-
 class Agent():
-    def __init__(self):
-        self.model = NeuralNetwork(516, 2500, 3)
+    def __init__(self, input_dims, n_actions, hidden_dims, batch_size, mem_size):
+        self.batch_size = batch_size
+        self.model = NeuralNetwork(input_dims, hidden_dims, n_actions)
         self.trainer = Trainer(self.model)
         self.epsilon = Epsilon()
         self.plot = Plotting()
-        self.memory = ReplayBuffer(100000, [516], 1)
+        self.memory = ReplayBuffer(mem_size, [input_dims], 1)
     
     # Select actions either by chance or by experience.
     def get_action(self, state):
@@ -34,10 +33,8 @@ class Agent():
     def create_command(self, action):
         if action == 0:
             command = [1, 0]
-
         elif action == 1:
             command = [0, 1]
-
         elif action == 2:
             command = [1, 1]
         else:
@@ -51,14 +48,12 @@ class Agent():
     
     # Use of replay memory.
     def replay_memory(self):
-        states, actions, rewards, states_ = \
-                self.memory.sample_buffer(BATCH_SIZE)
-        
-        actions = [item for sublist in actions for item in sublist]
-        if self.memory.mem_cntr < BATCH_SIZE:
-            return
-        
-        self.trainer.train_step(states.tolist(), actions, rewards.tolist(), states_.tolist(), BATCH_SIZE)
+        if self.memory.mem_cntr < self.batch_size:
+            states, actions, rewards, states_ = self.memory.sample_buffer(self.memory.mem_cntr)
+            self.trainer.train_step(states, actions, rewards, states_, self.memory.mem_cntr)
+        else:
+            states, actions, rewards, states_ = self.memory.sample_buffer(self.batch_size)        
+            self.trainer.train_step(states, actions, rewards, states_, self.batch_size)
 
     # Plotitng of the graph.
     def check_plot(self, laps_history):
