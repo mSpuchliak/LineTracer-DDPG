@@ -9,6 +9,14 @@ class StateAssigner:
         self.correct_rows_count_l_new = 0
         self.correct_rows_count_r_new = 0
 
+        self.iteration_counter_max = 100
+
+    def build_state_ddpg(self, norm_iteration_counter):
+        lstate = self.normalize_state(self.robot_data.left_sensor_state)
+        rstate = self.normalize_state(self.robot_data.right_sensor_state)
+
+        return lstate + rstate + [self.robot_data.orientation[0], self.robot_data.orientation[1]] + [self.robot_data.position[0], self.robot_data.position[1]] + [norm_iteration_counter]
+
     def build_state(self):
         lstate = self.normalize_state(self.robot_data.left_sensor_state)
         rstate = self.normalize_state(self.robot_data.right_sensor_state)
@@ -16,9 +24,13 @@ class StateAssigner:
         return lstate + rstate + [self.robot_data.orientation[0], self.robot_data.orientation[1]] + [self.robot_data.position[0], self.robot_data.position[1]]
     
     # Setting state and count of correct rows for both of sensors
-    def create_state(self, robot_data):
+    def create_state(self, robot_data, norm_iteration_counter = None):
         self.robot_data = robot_data
-        self.state = self.build_state()
+
+        if(norm_iteration_counter is not None):
+            self.state = self.build_state_ddpg(norm_iteration_counter)
+        else:
+            self.state = self.build_state()
 
         self.correct_rows_count_l = self.calc_correct_rows(self.robot_data.left_sensor_state)
         self.correct_rows_count_r = self.calc_correct_rows(self.robot_data.right_sensor_state)
@@ -31,9 +43,13 @@ class StateAssigner:
         return self.state
     
     # Setting new state and count of correct rows for both of sensors
-    def create_new_state(self, robot_data):
+    def create_new_state(self, robot_data, norm_iteration_counter = None):
         self.robot_data = robot_data
-        self.new_state = self.build_state()
+
+        if(norm_iteration_counter is not None):
+            self.new_state = self.build_state_ddpg(norm_iteration_counter)
+        else:
+            self.new_state = self.build_state()
 
         self.correct_rows_count_l_new = self.calc_correct_rows(self.robot_data.left_sensor_state)
         self.correct_rows_count_r_new = self.calc_correct_rows(self.robot_data.right_sensor_state)
@@ -91,4 +107,4 @@ class StateAssigner:
             return True
         else:
             return False
-        
+    
