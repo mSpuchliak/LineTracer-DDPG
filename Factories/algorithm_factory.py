@@ -1,5 +1,5 @@
 from DDPG.ddpg import DDPG
-from DeepQLearining.deep_q_learning import DeepQLearining
+from DQL.deep_q_learning import DQL
 
 class AlgorithmFactory():
     def __init__(self, scene):
@@ -10,5 +10,5 @@ class AlgorithmFactory():
             return DDPG(self.scene, algorithm_name)
 
         if (algorithm_name == 'DQL'):
-            return DeepQLearining(self.scene, algorithm_name)
+            return DQL(self.scene, algorithm_name)
         

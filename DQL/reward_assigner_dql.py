@@ -1,6 +1,6 @@
-from Utilities.reward_asigner import RewardAsigner
+from Utilities.reward_assigner import RewardAssigner
 
-class RewardAsignerDQL(RewardAsigner):
+class RewardAsignerDQL(RewardAssigner):
     def get_reward(self, robot_data):
         self.check_state(robot_data.correct_rows_count_l_new, robot_data.correct_rows_count_r_new)
 

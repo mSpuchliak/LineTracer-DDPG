@@ -1,6 +1,6 @@
-from DeepQLearining.epsilon import Epsilon 
-from DeepQLearining.neural_network import NeuralNetwork
-from DeepQLearining.trainer import Trainer
+from DQL.epsilon import Epsilon 
+from DQL.neural_network import NeuralNetwork
+from DQL.trainer import Trainer
 from Utilities.replay_buffer import ReplayBuffer
 import numpy as np
 import random

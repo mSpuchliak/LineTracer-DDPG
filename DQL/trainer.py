@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
-from DeepQLearining.neural_network import NeuralNetwork
+from DQL.neural_network import NeuralNetwork
 
 class Trainer:
     def __init__(self, model: NeuralNetwork = None):

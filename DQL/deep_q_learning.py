@@ -1,11 +1,11 @@
 from Abstract.algorithm import Algorithm
-from DeepQLearining.agent import Agent
-from DeepQLearining.reward_assigner_dql import RewardAsignerDQL
+from DQL.agent import Agent
+from DQL.reward_assigner_dql import RewardAsignerDQL
 from Utilities.line_tracer import LineTracerModel
 from Utilities.round_settings import RoundSettings
 from Utilities.state_assigner import StateAssigner
 
-class DeepQLearining(Algorithm):
+class DQL(Algorithm):
     def __init__(self, scene, name):
         super().__init__(scene, name)
         self.round_settings = RoundSettings(scene.name, name)

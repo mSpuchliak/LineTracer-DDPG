@@ -1,4 +1,4 @@
-class RewardAsigner:
+class RewardAssigner:
     def __init__(self, scene, round_settings):
         self.scene = scene
         self.round_settings = round_settings
