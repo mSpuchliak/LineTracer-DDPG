@@ -2,12 +2,16 @@ from statistics import mean
 from Utilities.plotting import Plotting
 
 class RoundSettings:
-    def __init__(self):
-        self.plot = Plotting()
-        self.finished_rounds_count = 0 
+    def __init__(self, scene_name, alg_name):
+        self.scene_name = scene_name
+        self.alg_name = alg_name
+        
+        self.max_rounds = 2
         self.done = False
         self.round_done = False
+        self.finished_rounds_count = 0 
 
+        self.plot = Plotting()
         self.laps_history = []
         self.speed_history = []
         self.lap_speed_history = []
@@ -24,8 +28,10 @@ class RoundSettings:
         self.mean_lap_speed_history.append(mean(self.lap_speed_history))
         self.speed_history.clear()
 
-    def check_if_model_finished(self):
-        if (self.finished_rounds_count == 500):
+    def increase_finished_rounds_count(self):
+        self.finished_rounds_count += 1    
+
+        if (self.finished_rounds_count == self.max_rounds):
             self.done = True
             self.save_graph()
     
@@ -47,4 +53,4 @@ class RoundSettings:
         return False
     
     def save_graph(self):
-        self.plot.save_graph()
+        self.plot.save_graph(self.scene_name, self.alg_name)

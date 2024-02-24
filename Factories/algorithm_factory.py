@@ -7,8 +7,8 @@ class AlgorithmFactory():
 
     def choose_algorithm(self, algorithm_name):
         if (algorithm_name == 'DDPG'):
-            return DDPG(self.scene)
+            return DDPG(self.scene, algorithm_name)
 
         if (algorithm_name == 'DQL'):
-            return DeepQLearining(self.scene)
+            return DeepQLearining(self.scene, algorithm_name)
         

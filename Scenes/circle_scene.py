@@ -3,7 +3,8 @@ from os.path import dirname, join, abspath
 
 class CircleScene(Scene):
     def __init__(self):
-        self.name = join(dirname(dirname(abspath(__file__))), 'Scenes_coppelia/scene_LineTracerCircle.ttt')
+        self.name = "circleScene"
+        self.path = join(dirname(dirname(abspath(__file__))), 'Scenes_coppelia/scene_LineTracerCircle.ttt')
         self.starting_position = [-0.7557606101036072, -0.1000010147690773, 0.027543731033802032, 0.5213239192962646, -0.4777219295501709, 0.5213421583175659, 0.4777086675167084]
         self.checkpoint_1 = [-0.08076076209545135, 0.749998927116394, 0.027543731033802032, 0.030842673033475876, -0.7064442038536072, 0.03084390237927437, 0.7064234018325806]
         self.checkpoint_2 = [0.744239330291748, 0.07499896734952927, 0.027543731033802032, -0.4777083694934845, -0.521342396736145, -0.4777222275733948, 0.521323561668396]

@@ -7,23 +7,23 @@ from DDPG.agent import Agent
 from DDPG.iteration_counter import IterationCounter
 
 class DDPG(Algorithm):
-    def __init__(self, scene):
-        super().__init__(scene)
-        self.round_settings = RoundSettings()
+    def __init__(self, scene, name):
+        super().__init__(scene, name)
+        self.round_settings = RoundSettings(scene.name, name)
         self.iteration_counter = IterationCounter()
         self.state_assigner = StateAssigner()
         self.reward_assigner = RewardAsignerDDPG(scene, self.round_settings)
         self.agent = Agent(alpha=0.0001, beta=0.001, input_dims=[517], tau=0.001,
                         batch_size=64, fc1_dims=400, fc2_dims=300, n_actions=2)
 
-
-    def start(self):
-        self.pyrep.launch(self.scene.name, headless=False)
+    def start(self, load_model_name=str()):
+        self.pyrep.launch(self.scene.path, headless=False)
         self.pyrep.start()
 
         model = LineTracerModel()
         
-        #agent.load_model()
+        if(load_model_name):
+            self.agent.load_model(load_model_name)
         self.agent.noise.reset()        
 
         while not self.round_settings.done:
@@ -34,10 +34,7 @@ class DDPG(Algorithm):
 
             # ACTION
             action_l, action_r = self.agent.choose_action(state)
-
-            scaled_action_l, scaled_action_r = self.agent.scale_action(action_l, action_r)
-
-            command = [scaled_action_l, scaled_action_r]
+            command = self.agent.scale_action(action_l, action_r)
 
             model.set_joint_target_velocities(command)
             self.pyrep.step()
@@ -61,9 +58,7 @@ class DDPG(Algorithm):
             if(self.round_settings.check_round_done()):
                 model.reset_robot_position(self.scene.starting_position)
                 self.iteration_counter.reset_iteration_counter()
-                self.round_settings.finished_rounds_count += 1
-            
-            self.round_settings.check_if_model_finished()
+                self.round_settings.increase_finished_rounds_count()
                 
         self.agent.save_model()
         self.pyrep.stop()

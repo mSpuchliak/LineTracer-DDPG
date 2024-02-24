@@ -17,6 +17,8 @@ class Plotting:
         plt.plot(laps_history)
         plt.show(block=False)
         plt.pause(.1)
+
+        self.plt = plt.gcf()
     
     def plot_laps_and_speed(self, laps_history, lap_speed_history, mean_lap_speed_history):
         display.clear_output(wait=True)
@@ -41,8 +43,8 @@ class Plotting:
 
         self.plt = plt.gcf()
 
-    def save_graph(self):
+    def save_graph(self, scene_name, alg_name):
         current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        name = f"Result graph {current_datetime}.png"
+        name = f"{alg_name}_{scene_name}_{current_datetime}.png"
         filepath = os.path.join(os.getcwd(), "Results", "Graphs", name)
         self.plt.savefig(filepath)

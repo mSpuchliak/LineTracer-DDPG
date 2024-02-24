@@ -1,11 +1,10 @@
-import numpy as np
-import random
-import torch
 from DeepQLearining.epsilon import Epsilon 
 from DeepQLearining.neural_network import NeuralNetwork
 from DeepQLearining.trainer import Trainer
-from Utilities.plotting import Plotting
 from Utilities.replay_buffer import ReplayBuffer
+import numpy as np
+import random
+import torch as T
 
 class Agent():
     def __init__(self, input_dims, n_actions, hidden_dims, batch_size, mem_size):
@@ -13,7 +12,6 @@ class Agent():
         self.model = NeuralNetwork(input_dims, hidden_dims, n_actions)
         self.trainer = Trainer(self.model)
         self.epsilon = Epsilon()
-        self.plot = Plotting()
         self.memory = ReplayBuffer(mem_size, [input_dims], 1)
     
     # Select actions either by chance or by experience.
@@ -23,9 +21,9 @@ class Agent():
         if np.random.random() < self.epsilon.value:
             action = random.randint(0, 2)
         else:
-            state = torch.tensor(state, dtype= torch.float)
+            state = T.tensor(state, dtype= T.float)
             actions = self.model.forward(state)
-            action = torch.argmax(actions).item()
+            action = T.argmax(actions).item()
 
         return action
             
@@ -54,8 +52,9 @@ class Agent():
         else:
             states, actions, rewards, states_ = self.memory.sample_buffer(self.batch_size)        
             self.trainer.train_step(states, actions, rewards, states_, self.batch_size)
-
-    # Plotitng of the graph.
-    def check_plot(self, laps_history):
-        if (self.epsilon.value == self.epsilon.epsilon_min):
-            self.plot.plot_laps(laps_history)
+    
+    def save_model(self):
+        self.model.save_checkpoint()
+    
+    def load_model(self, load_model_name):
+        self.model.load_checkpoint(load_model_name)

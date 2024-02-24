@@ -1,6 +1,7 @@
 import torch as T
 import numpy as np
 import torch.nn.functional as F
+import datetime
 from DDPG.neural_networks import ActorNetwork, CriticNetwork
 from Utilities.replay_buffer import ReplayBuffer
 from DDPG.noise import OUActionNoise
@@ -14,21 +15,22 @@ class Agent():
         self.batch_size = batch_size
         self.alpha = alpha
         self.beta = beta
-
+        current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        
         self.memory = ReplayBuffer(max_size, input_dims, n_actions)
 
         self.noise = OUActionNoise(mu=np.zeros(n_actions))
 
         self.actor = ActorNetwork(alpha, input_dims, fc1_dims, fc2_dims,
-                                n_actions=n_actions, name='actor')
+                                n_actions=n_actions,  name='actor', current_datetime = current_datetime)
         self.critic = CriticNetwork(beta, input_dims, fc1_dims, fc2_dims,
-                                n_actions=n_actions, name='critic')
+                                n_actions=n_actions, name='critic',current_datetime = current_datetime)
 
         self.target_actor = ActorNetwork(alpha, input_dims, fc1_dims, fc2_dims,
-                                n_actions=n_actions, name='target_actor')
+                                n_actions=n_actions, name='target_actor', current_datetime = current_datetime)
 
         self.target_critic = CriticNetwork(beta, input_dims, fc1_dims, fc2_dims,
-                                n_actions=n_actions, name='target_critic')
+                                n_actions=n_actions, name='target_critic', current_datetime = current_datetime)
 
         self.update_network_parameters(tau=1)
         
@@ -125,7 +127,7 @@ class Agent():
         sigmoid_outputr = T.sigmoid(T.tensor(action_r))
         scaled_action_r = 4 * sigmoid_outputr + 1
 
-        return scaled_action_l, scaled_action_r
+        return [scaled_action_l, scaled_action_r]
     
     def save_model(self):
         self.actor.save_checkpoint()
@@ -133,8 +135,8 @@ class Agent():
         self.target_actor.save_checkpoint()
         self.target_critic.save_checkpoint()
     
-    def load_model(self):
-        self.actor.load_checkpoint()
-        self.critic.load_checkpoint()
-        self.target_actor.load_checkpoint()
-        self.target_critic.load_checkpoint()
+    def load_model(self, load_model_name):
+        self.actor.load_checkpoint(load_model_name)
+        self.critic.load_checkpoint(load_model_name)
+        self.target_actor.load_checkpoint(load_model_name)
+        self.target_critic.load_checkpoint(load_model_name)
