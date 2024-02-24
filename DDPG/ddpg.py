@@ -1,8 +1,8 @@
 from Abstract.algorithm import Algorithm
-from DDPG.agent import Agent
 from Utilities.line_tracer import LineTracerModel
-from DDPG.reward_assigner_ddpg import RewardAsignerDDPG
 from Utilities.state_assigner import StateAssigner
+from DDPG.reward_assigner_ddpg import RewardAsignerDDPG
+from DDPG.agent import Agent
 from DDPG.iteration_counter import IterationCounter
 
 class DDPG(Algorithm):
