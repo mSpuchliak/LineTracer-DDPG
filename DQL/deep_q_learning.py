@@ -49,7 +49,7 @@ class DQL(Algorithm):
             if(self.round_settings.check_round_done_dql()):
                 self.agent.replay_memory()
                 model.reset_robot_position(self.scene.starting_position)
-                self.round_settings.increase_finished_rounds_count()
+                self.round_settings.check_finished_rounds_count()
 
         self.agent.save_model()
         self.pyrep.stop()

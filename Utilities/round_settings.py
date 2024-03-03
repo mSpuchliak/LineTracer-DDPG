@@ -16,6 +16,19 @@ class RoundSettings:
         self.speed_history = []
         self.lap_speed_history = []
         self.mean_lap_speed_history = []
+        self.value = 0
+        self.iteration_incrementer = 0.1
+        self.iteration_counter_max = 100
+
+    def get_norm_iteration_counter(self):
+        return (self.value/self.iteration_counter_max)
+    
+    def update_iteration_counter(self):
+        if self.value < self.iteration_counter_max:
+            self.value += self.iteration_incrementer
+
+    def reset_iteration_counter(self):
+        self.value = 0
 
     def add_to_laps_history(self, round_result):
         self.laps_history.append(round_result)
@@ -28,7 +41,7 @@ class RoundSettings:
         self.mean_lap_speed_history.append(mean(self.lap_speed_history))
         self.speed_history.clear()
 
-    def increase_finished_rounds_count(self):
+    def check_finished_rounds_count(self):
         self.finished_rounds_count += 1    
 
         if (self.finished_rounds_count == self.max_rounds):
