@@ -4,6 +4,7 @@ from Utilities.state_assigner import StateAssigner
 from Utilities.round_settings import RoundSettings
 from DDPG.reward_assigner_ddpg import RewardAsignerDDPG
 from DDPG.agent import Agent
+import Timer
 
 class DDPG(Algorithm):
     def __init__(self, scene, name):
@@ -22,7 +23,11 @@ class DDPG(Algorithm):
         
         if(load_model_name):
             self.agent.load_model(load_model_name)
-        self.agent.noise.reset()        
+        self.agent.noise.reset()   
+        timer = Timer()
+
+    # Start the timer
+        timer.start()    
 
         while not self.round_settings.done:
             # STATE
@@ -55,8 +60,12 @@ class DDPG(Algorithm):
 
             if(self.round_settings.check_round_done()):
                 model.reset_robot_position(self.scene.starting_position)
-                self.round_settings.reset_iteration_counter()
-                self.round_settings.check_finished_rounds_count()
+
+        timer.stop()
+
+        # Print the elapsed time
+        print("Execution time:", timer.elapsed_time())
+
                 
         self.agent.save_model()
         self.pyrep.stop()

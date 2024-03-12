@@ -20,7 +20,7 @@ class Plotting:
 
         self.plt = plt.gcf()
     
-    def plot_laps_and_speed(self, laps_history, lap_speed_history, mean_lap_speed_history):
+    def plot_laps_and_speed(self, laps_history, lap_speed_history, mean_lap_speed_history, mean_reward_history, iteration_counter_history):
         display.clear_output(wait=True)
         plt.clf()
         plt.ion()
@@ -38,6 +38,12 @@ class Plotting:
         plt.plot(lap_speed_history)
         plt.plot(mean_lap_speed_history)
         
+        # # Create subplot 2
+        # plt.subplot(3, 1, 3)
+        # plt.xlabel('Number of starts')
+        # plt.ylabel('Average reward')
+        # plt.plot(mean_reward_history)
+
         plt.show(block=False)
         plt.pause(.1)
 
@@ -47,4 +53,4 @@ class Plotting:
         current_datetime = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         name = f"{alg_name}_{scene_name}_{current_datetime}.png"
         filepath = os.path.join(os.getcwd(), "Results", "Graphs", name)
-        self.plt.savefig(filepath)
+        #self.plt.savefig(filepath)

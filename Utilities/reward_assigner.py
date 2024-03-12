@@ -99,20 +99,21 @@ class RewardAssigner:
         self.round_settings.add_to_speed_history(self.speed.item())
 
         if(self.reward > self.one_sensor_reward):
-            if(self.speed < 4):
-                self.reward -= 90
-            if(4 < self.speed < 5):
+            if(self.speed < 5):
                 self.reward -= 60
-            if(5 < self.speed < 5.5):
+            elif(5 < self.speed <= 5.5):
                 self.reward -= 30
-            elif(5.5 <= self.speed < 6.0):
+            elif(5.5 < self.speed <= 6.0):
                 self.reward -= 10     
-            elif(6 <= self.speed < 6.5):
+            elif(6 < self.speed <= 6.5):
                 self.reward += 30
-            elif(6.5 <= self.speed < 7.0):
+            elif(6.5 < self.speed <= 7.0):
                 self.reward += 50
-            elif(7 >= self.speed):
+            elif(7 < self.speed <= 7.5):
+                self.reward += 70
+            elif(7.5 < self.speed):
                 self.reward += 90
+
 
     def get_reward(self):
         return self.reward

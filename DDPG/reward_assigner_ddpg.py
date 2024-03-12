@@ -12,6 +12,8 @@ class RewardAsignerDDPG(RewardAssigner):
 
         self.speed_check(command)
 
-        self.reward -= iteration_counter.value
+        self.reward -= iteration_counter.iteration_counter
+
+        self.round_settings.add_to_reward_history(self.reward)
 
         return self.reward
