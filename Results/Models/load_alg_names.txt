@@ -1,0 +1,4 @@
+To load a scene write the date of a saved model in algorithm.start("date")
+-------------DDPG------------------
+Circle scene: "20240316_184314"
+Curve scene: "20240304_230456"

@@ -44,7 +44,7 @@ class DQL(Algorithm):
             reward = self.reward_asigner.get_reward(robot_data)
 
             # CALCULATION OF BELLMAN
-            self.agent.target_memory(state, action, reward, new_state)
+            self.agent.learn(state, action, reward, new_state)
 
             if(self.round_settings.check_round_done_dql()):
                 self.agent.replay_memory()

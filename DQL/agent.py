@@ -40,7 +40,7 @@ class Agent():
 
         return command
     
-    def target_memory(self, state, action, reward, new_state):
+    def learn(self, state, action, reward, new_state):
         self.memory.store_transition(state, action, reward, new_state)
         self.trainer.train_step([state], action, [reward], [new_state], 1)
     

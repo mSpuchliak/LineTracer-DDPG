@@ -4,7 +4,6 @@ from Utilities.state_assigner import StateAssigner
 from Utilities.round_settings import RoundSettings
 from DDPG.reward_assigner_ddpg import RewardAsignerDDPG
 from DDPG.agent import Agent
-import Timer
 
 class DDPG(Algorithm):
     def __init__(self, scene, name):
@@ -18,17 +17,12 @@ class DDPG(Algorithm):
     def start(self, load_model_name=str()):
         self.pyrep.launch(self.scene.path, headless=False)
         self.pyrep.start()
-
         model = LineTracerModel()
         
         if(load_model_name):
             self.agent.load_model(load_model_name)
+
         self.agent.noise.reset()   
-        timer = Timer()
-
-    # Start the timer
-        timer.start()    
-
         while not self.round_settings.done:
             # STATE
             robot_data = model.get_robot_data()
@@ -38,8 +32,8 @@ class DDPG(Algorithm):
             # ACTION
             action_l, action_r = self.agent.choose_action(state)
             command = self.agent.scale_action(action_l, action_r)
-
             model.set_joint_target_velocities(command)
+            
             self.pyrep.step()
 
             # NEW STATE
@@ -50,8 +44,6 @@ class DDPG(Algorithm):
             reward = self.reward_assigner.get_reward(robot_data, command, self.round_settings)
 
             # LEARNING
-            #print(command[0],command[1], reward)
-
             self.agent.remember(state, [action_l, action_r], reward, new_state)
             self.agent.learn()
 
@@ -60,12 +52,6 @@ class DDPG(Algorithm):
 
             if(self.round_settings.check_round_done()):
                 model.reset_robot_position(self.scene.starting_position)
-
-        timer.stop()
-
-        # Print the elapsed time
-        print("Execution time:", timer.elapsed_time())
-
                 
         self.agent.save_model()
         self.pyrep.stop()
